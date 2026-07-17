@@ -13,6 +13,7 @@ const listWidgets = defineAction({
   outputSchema: z.object({
     widgets: z.array(z.object({ id: z.string(), name: z.string() })),
   }),
+  httpMethods: ['GET'],
   handler: async (ctx, input) => {
     const query = input.status ? `?status=${input.status}` : '';
     const res = await ctx.request('GET', `/widgets${query}`);
@@ -30,6 +31,7 @@ const createWidget = defineAction({
     id: z.string(),
     name: z.string(),
   }),
+  httpMethods: ['POST'],
   handler: async (ctx, input) => {
     const res = await ctx.request('POST', '/widgets', { body: { name: input.name } });
     return res.body as { id: string; name: string };

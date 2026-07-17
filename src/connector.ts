@@ -6,6 +6,20 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown> {
   description: string;
   inputSchema: z.ZodType<TInput>;
   outputSchema?: z.ZodType<TOutput>;
+  /**
+   * The HTTP method(s) this action's handler issues via `ctx.request(...)`
+   * (e.g. `['GET']` for a list action, `['POST']` for a WIQL query action).
+   *
+   * Advisory metadata for classification only — the SDK does not validate
+   * that the handler's actual calls match this declaration, and `runAction`
+   * behavior is unchanged either way.
+   *
+   * Absent means unknown, not read-only: downstream consumers (e.g. the main
+   * Atrium app's connector-update flow) treat an action with no `httpMethods`
+   * as write-capable by default, fail-safe. The ergonomic read-only fast path
+   * only lights up when this field is present and contains only `GET`.
+   */
+  httpMethods?: string[];
   handler: (ctx: AtriumClient, input: TInput) => Promise<TOutput>;
 }
 

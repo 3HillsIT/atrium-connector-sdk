@@ -73,4 +73,29 @@ describe('defineAction / runAction validation', () => {
     expect(receivedCtx).toBe(stubCtx);
     expect(JSON.stringify(receivedCtx)).not.toMatch(/secret|credential|token/i);
   });
+
+  test('defineAction accepts an action with httpMethods declared', async () => {
+    const action = defineAction({
+      id: 'list-things',
+      description: 'test',
+      inputSchema: z.object({}),
+      httpMethods: ['GET'],
+      handler: async () => ({}),
+    });
+    expect(action.httpMethods).toEqual(['GET']);
+    const result = await runAction(action, stubCtx, {});
+    expect(result).toEqual({});
+  });
+
+  test('defineAction accepts an action with httpMethods omitted', async () => {
+    const action = defineAction({
+      id: 'no-http-methods',
+      description: 'test',
+      inputSchema: z.object({}),
+      handler: async () => ({}),
+    });
+    expect(action.httpMethods).toBeUndefined();
+    const result = await runAction(action, stubCtx, {});
+    expect(result).toEqual({});
+  });
 });
