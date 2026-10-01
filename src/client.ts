@@ -23,6 +23,17 @@ export interface AtriumResponse {
 
 export interface AtriumClient {
   request(method: string, path: string, opts?: AtriumRequestOptions): Promise<AtriumResponse>;
+  /**
+   * Origin (scheme + host + port, no path) of the instance the linked
+   * integration points at, e.g. `https://crm.example.com` for an instance URL
+   * of `https://crm.example.com/services/rest`. Use it to build links back
+   * into that instance's own UI for the user to click.
+   *
+   * Not a credential, so unlike the secret it is handed to the connector
+   * directly. Undefined when the harness doesn't provide one (older Atrium
+   * versions, or an endpoint without a linked integration).
+   */
+  readonly instanceOrigin?: string;
 }
 
 /** Base class for every error this client throws. Never carries a raw credential. */
@@ -56,6 +67,18 @@ export class AtriumBrokerUnreachableError extends AtriumClientError {}
 
 const REQUIRED_ENV_VARS = ['ATRIUM_BROKER_URL', 'ATRIUM_BROKER_TOKEN'] as const;
 
+function readInstanceOrigin(): string | undefined {
+  const value = process.env.ATRIUM_INSTANCE_ORIGIN;
+  if (!value) return undefined;
+  try {
+    return new URL(value).origin;
+  } catch {
+    throw new Error(
+      `@atrium/connector-sdk: environment variable "ATRIUM_INSTANCE_ORIGIN" is not a valid URL: "${value}".`
+    );
+  }
+}
+
 function readRequiredEnv(name: (typeof REQUIRED_ENV_VARS)[number]): string {
   const value = process.env[name];
   if (!value) {
@@ -84,12 +107,17 @@ function readRequiredEnv(name: (typeof REQUIRED_ENV_VARS)[number]): string {
  * Every request() call below attaches this constructor-time value automatically;
  * connector-authoring code (Section 4's ctx.request(method, path, opts)) never
  * passes or sees it.
+ *
+ * ATRIUM_INSTANCE_ORIGIN is optional and exposed as `instanceOrigin`. It is
+ * normalized to a bare origin, so a full instance URL with a path is fine too.
  */
 export function createAtriumClient(integrationId: string): AtriumClient {
   const brokerUrl = readRequiredEnv('ATRIUM_BROKER_URL');
   const brokerToken = readRequiredEnv('ATRIUM_BROKER_TOKEN');
+  const instanceOrigin = readInstanceOrigin();
 
   return {
+    instanceOrigin,
     async request(method, path, opts = {}) {
       let res: Response;
       try {

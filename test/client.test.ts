@@ -9,7 +9,7 @@ import {
 import { startMockAtriumBroker, type MockAtriumBroker } from './support/mock-broker';
 import { startFakeDownstream, type FakeDownstreamServer } from './support/fake-downstream';
 
-const ENV_KEYS = ['ATRIUM_BROKER_URL', 'ATRIUM_BROKER_TOKEN'] as const;
+const ENV_KEYS = ['ATRIUM_BROKER_URL', 'ATRIUM_BROKER_TOKEN', 'ATRIUM_INSTANCE_ORIGIN'] as const;
 let savedEnv: Record<string, string | undefined>;
 
 beforeEach(() => {
@@ -35,6 +35,28 @@ describe('createAtriumClient env validation', () => {
     process.env.ATRIUM_BROKER_URL = 'http://127.0.0.1:1';
     delete process.env.ATRIUM_BROKER_TOKEN;
     expect(() => createAtriumClient('integration-123')).toThrow(/ATRIUM_BROKER_TOKEN/);
+  });
+});
+
+describe('createAtriumClient instanceOrigin', () => {
+  beforeEach(() => {
+    process.env.ATRIUM_BROKER_URL = 'http://127.0.0.1:1';
+    process.env.ATRIUM_BROKER_TOKEN = 'tok';
+  });
+
+  test('is undefined when ATRIUM_INSTANCE_ORIGIN is not set', () => {
+    delete process.env.ATRIUM_INSTANCE_ORIGIN;
+    expect(createAtriumClient('integration-123').instanceOrigin).toBeUndefined();
+  });
+
+  test('strips path, query and trailing slash down to the origin', () => {
+    process.env.ATRIUM_INSTANCE_ORIGIN = 'https://crm.example.com:8443/services/rest/?x=1';
+    expect(createAtriumClient('integration-123').instanceOrigin).toBe('https://crm.example.com:8443');
+  });
+
+  test('throws naming ATRIUM_INSTANCE_ORIGIN when it is not a valid URL', () => {
+    process.env.ATRIUM_INSTANCE_ORIGIN = 'not a url';
+    expect(() => createAtriumClient('integration-123')).toThrow(/ATRIUM_INSTANCE_ORIGIN/);
   });
 });
 

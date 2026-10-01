@@ -2,7 +2,7 @@ import { spawn } from 'bun';
 import { writeFileSync, unlinkSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { startAtriumBroker, type AtriumRequestContext } from './atrium-broker';
+import { resolveInstanceOrigin, startAtriumBroker, type AtriumRequestContext } from './atrium-broker';
 
 const ATRIUM_GLOBAL = `
 import urllib.request as _atrium_urllib_request
@@ -14,6 +14,8 @@ os.environ.pop('ATRIUM_BROKER_URL', None)
 os.environ.pop('ATRIUM_BROKER_TOKEN', None)
 
 class _AtriumClient:
+    instance_origin = os.environ.get('ATRIUM_INSTANCE_ORIGIN')
+
     @staticmethod
     def request(integration_id, method, path, headers=None, body=None):
         if not _atrium_broker_url or not _atrium_broker_token:
@@ -89,6 +91,7 @@ sys.exit(0)
   let broker: ReturnType<typeof startAtriumBroker> | null = null;
   try {
     broker = requestContext ? startAtriumBroker(requestContext) : null;
+    const instanceOrigin = requestContext ? resolveInstanceOrigin(requestContext) : undefined;
 
     const proc = spawn({
       cmd: ['python3', tmpFile],
@@ -99,6 +102,7 @@ sys.exit(0)
         HOME: tmpdir(),
         PATH: process.env.PATH ?? '/usr/local/bin:/usr/bin:/bin',
         ...(broker ? { ATRIUM_BROKER_URL: broker.url, ATRIUM_BROKER_TOKEN: broker.token } : {}),
+        ...(instanceOrigin ? { ATRIUM_INSTANCE_ORIGIN: instanceOrigin } : {}),
       },
     });
 

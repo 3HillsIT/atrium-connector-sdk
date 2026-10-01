@@ -2,7 +2,7 @@ import { spawn } from 'bun';
 import { writeFileSync, unlinkSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { startAtriumBroker, type AtriumRequestContext } from './atrium-broker';
+import { resolveInstanceOrigin, startAtriumBroker, type AtriumRequestContext } from './atrium-broker';
 
 const ATRIUM_GLOBAL = `
 const __atriumBrokerUrl = process.env.ATRIUM_BROKER_URL;
@@ -10,6 +10,7 @@ const __atriumBrokerToken = process.env.ATRIUM_BROKER_TOKEN;
 delete process.env.ATRIUM_BROKER_URL;
 delete process.env.ATRIUM_BROKER_TOKEN;
 globalThis.atrium = Object.freeze({
+  instanceOrigin: process.env.ATRIUM_INSTANCE_ORIGIN,
   request: async (integrationId, method, path, opts) => {
     if (!__atriumBrokerUrl || !__atriumBrokerToken) {
       throw new Error('atrium.request is unavailable: this endpoint has no integration linked.');
@@ -52,6 +53,7 @@ export async function runTypeScript(
   let broker: ReturnType<typeof startAtriumBroker> | null = null;
   try {
     broker = requestContext ? startAtriumBroker(requestContext) : null;
+    const instanceOrigin = requestContext ? resolveInstanceOrigin(requestContext) : undefined;
 
     const proc = spawn({
       cmd: ['bun', 'run', tmpFile],
@@ -62,6 +64,7 @@ export async function runTypeScript(
         HOME: tmpdir(),
         PATH: process.env.PATH ?? '/usr/local/bin:/usr/bin:/bin',
         ...(broker ? { ATRIUM_BROKER_URL: broker.url, ATRIUM_BROKER_TOKEN: broker.token } : {}),
+        ...(instanceOrigin ? { ATRIUM_INSTANCE_ORIGIN: instanceOrigin } : {}),
       },
     });
 

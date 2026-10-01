@@ -23,6 +23,20 @@ export interface AtriumRequestContext {
   secret: string;
 }
 
+// Origin (scheme + host + port) of the upstream the broker calls, handed to
+// the child as ATRIUM_INSTANCE_ORIGIN so a connector can build links into the
+// instance's own UI. Not a credential, so it can cross the boundary. Derived
+// from the full API base rather than instanceUrl alone, because a provider
+// without an instance concept (Azure DevOps) has instanceUrl '' and an
+// absolute apiBasePath. Undefined when that base doesn't parse as a URL.
+export function resolveInstanceOrigin(ctx: AtriumRequestContext): string | undefined {
+  try {
+    return new URL(buildRequestUrl(ctx.requestConfig, ctx.instanceUrl, '')).origin;
+  } catch {
+    return undefined;
+  }
+}
+
 export interface AtriumBroker {
   url: string;
   token: string;
