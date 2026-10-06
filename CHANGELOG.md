@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+Brings this repo level with the copy Atrium vendors in `backend/vendor/connector-sdk`, where the #10368 changes landed first. Atrium deletes that copy (#11019), so from here on this repo is the only SDK.
+
+- **Breaking for Connector source:** `connectorApiVersion` is removed from `ConnectorDefinition`. A Connector no longer declares it; Atrium's publish script stamps `CURRENT_CONNECTOR_API_VERSION` into the Artifact manifest from the SDK it bundled. A Connector that still sets the field fails to typecheck until the line is deleted.
+- `CURRENT_CONNECTOR_API_VERSION` is the SDK's only version constant: the bundle contract version its `AtriumClient` speaks. The window of versions an Instance accepts is defined in Atrium's own code, so Atrium's copy's `MIN_SUPPORTED_CONNECTOR_API_VERSION` is not part of this SDK. Atrium's publish refuses a Connector whose SDK declares a different version than the publishing Atrium.
+- `CURRENT_CONNECTOR_API_VERSION` now means the **bundle contract**: the handshake between Atrium and a published Artifact's Action bundle (`__atriumRun(ctx, input)` and `ctx.request(...)`), not the shape of the authoring types. An SDK change can no longer break a published Artifact, because Bun.build inlines the SDK into it. See `docs/adr/0007-connector-artifact-format-and-store.md` in the Atrium repo, "Clarifications from #10368".
+- `CURRENT_CONNECTOR_API_VERSION` stays at 1; already published Artifacts are unaffected.
+
 ## 0.3.0
 
 - Add optional `instanceOrigin?: string` to `AtriumClient` (`ctx.instanceOrigin` in a handler): the origin of the instance the linked integration points at, e.g. `https://crm.example.com` for `https://crm.example.com/services/rest`. Connectors use it to return clickable links into the customer's own instance.

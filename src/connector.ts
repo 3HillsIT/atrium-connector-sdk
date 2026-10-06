@@ -29,7 +29,6 @@ export interface ConnectorDefinition {
   description: string;
   authTypes: Array<'pat' | 'oauth2'>;
   configSchema: z.ZodType<unknown>;
-  connectorApiVersion: number;
   // `any, any` (not the default `unknown, unknown`) deliberately — with
   // `unknown`, TS's contravariant check on `handler`'s input parameter makes
   // it impossible to put any concretely-typed action (which is every real

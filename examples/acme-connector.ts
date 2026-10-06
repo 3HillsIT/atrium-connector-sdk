@@ -2,7 +2,7 @@
 // readable reference for what authoring a real connector on top of
 // @atrium/connector-sdk looks like. Not a real integration.
 
-import { defineConnector, defineAction, z, CURRENT_CONNECTOR_API_VERSION } from '../src/index';
+import { defineConnector, defineAction, z } from '../src/index';
 
 const listWidgets = defineAction({
   id: 'list-widgets',
@@ -46,7 +46,6 @@ export const acmeConnector = defineConnector({
   configSchema: z.object({
     workspaceSlug: z.string().min(1),
   }),
-  connectorApiVersion: CURRENT_CONNECTOR_API_VERSION,
   actions: [listWidgets, createWidget],
   // Acme's health-check endpoint needs a POST with a body, so the app's
   // generic GET-based connectivity check won't work here — this is exactly
