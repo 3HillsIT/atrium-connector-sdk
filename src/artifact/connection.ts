@@ -15,6 +15,7 @@
 // call. Every refusal names the field, as a path from `connection`.
 
 import { artifactError } from './errors';
+import { CONNECTION_AUTH_TYPES } from './types';
 import type { ConnectorConnection } from './types';
 
 /** What a config field's name must look like: an apiBasePath placeholder is `{\w+}`. */
@@ -209,7 +210,9 @@ export function parseConnection(raw: unknown, where = 'manifest.json'): Connecto
     default:
       refuse(
         `${authPath}.type`,
-        `(${JSON.stringify(auth.type)}) must be one of "pat", "multi-header" or "oauth2".`,
+        `(${JSON.stringify(auth.type)}) must be one of ${CONNECTION_AUTH_TYPES.slice(0, -1)
+          .map((type) => JSON.stringify(type))
+          .join(', ')} or ${JSON.stringify(CONNECTION_AUTH_TYPES.at(-1))}.`,
       );
   }
 

@@ -123,11 +123,13 @@ export {
   CONNECTION_MANIFEST_VERSION,
   CONNECTOR_ID_PATTERN,
   CONNECTOR_VERSION_PATTERN,
+  CONNECTION_AUTH_TYPES,
   artifactFileName,
 } from './types';
 export type {
   ArtifactSignature,
   ConnectionAuth,
+  ConnectionAuthType,
   ConnectionConfigField,
   ConnectorConnection,
   ListedFile,

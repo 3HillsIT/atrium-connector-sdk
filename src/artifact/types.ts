@@ -98,6 +98,15 @@ export type ConnectionAuth =
   | { type: 'oauth2'; scope: string };
 
 /**
+ * Every sign-in kind a `connection` block can name (`request.auth.type`), in
+ * the order they are offered: the validator's list, and `init`'s.
+ */
+export const CONNECTION_AUTH_TYPES = ['pat', 'multi-header', 'oauth2'] as const satisfies readonly ConnectionAuth['type'][];
+
+/** A sign-in kind: `pat`, `multi-header` or `oauth2`. */
+export type ConnectionAuthType = (typeof CONNECTION_AUTH_TYPES)[number];
+
+/**
  * A Connector's connection settings: what an Integration of it asks for, and
  * how a request to the system behind it is built. One per Connector
  * (ADR-0014 §3). Named `connection`, never `provider` — that term is retired.
