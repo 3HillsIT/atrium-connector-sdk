@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@atrium/connector-sdk",
+      "name": "@3hillsit/atrium-connector-sdk",
       "dependencies": {
         "zod": "^3.23.8",
       },

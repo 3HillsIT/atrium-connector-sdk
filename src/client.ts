@@ -2,7 +2,7 @@
 // deliberately standalone: it must not import anything from the
 // connector-authoring layer (./connector.ts, ./index.ts), so the main
 // Atrium app's custom-code execution harness can eventually import only
-// this file (via the "@atrium/connector-sdk/client" subpath) without
+// this file (via the "@3hillsit/atrium-connector-sdk/client" subpath) without
 // pulling in Zod or any authoring machinery it doesn't need.
 //
 // Wire protocol here is verified against reference/atrium-broker.ts and
@@ -74,7 +74,7 @@ function readInstanceOrigin(): string | undefined {
     return new URL(value).origin;
   } catch {
     throw new Error(
-      `@atrium/connector-sdk: environment variable "ATRIUM_INSTANCE_ORIGIN" is not a valid URL: "${value}".`
+      `@3hillsit/atrium-connector-sdk: environment variable "ATRIUM_INSTANCE_ORIGIN" is not a valid URL: "${value}".`
     );
   }
 }
@@ -83,7 +83,7 @@ function readRequiredEnv(name: (typeof REQUIRED_ENV_VARS)[number]): string {
   const value = process.env[name];
   if (!value) {
     throw new Error(
-      `@atrium/connector-sdk: missing required environment variable "${name}". ` +
+      `@3hillsit/atrium-connector-sdk: missing required environment variable "${name}". ` +
         `createAtriumClient() must be called from inside an Atrium-managed execution context, ` +
         `where the mediation broker sets this before your connector code runs.`
     );

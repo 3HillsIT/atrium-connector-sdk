@@ -1,6 +1,14 @@
 # Atrium Connector SDK
 
-`@atrium/connector-sdk` is what a Connector is written against: `defineConnector`, `defineAction`, `runAction`, the `AtriumClient` type of a handler's `ctx`, and `CURRENT_CONNECTOR_API_VERSION`. This README is the guide to building or changing a Connector. Publishing one happens in the Atrium repo ([Publishing](#publishing)).
+`@3hillsit/atrium-connector-sdk` is what a Connector is written against: `defineConnector`, `defineAction`, `runAction`, the `AtriumClient` type of a handler's `ctx`, and `CURRENT_CONNECTOR_API_VERSION`. This README is the guide to building or changing a Connector. Publishing one happens in the Atrium repo ([Publishing](#publishing)).
+
+```
+bun add @3hillsit/atrium-connector-sdk
+```
+
+The SDK needs Bun. It is MIT-licensed ([LICENSE](LICENSE)).
+
+**Issues are welcome**: report a bug or ask a question in this repo's GitHub issues. **Pull requests from outside 3 Hills IT are not taken for now**; open an issue instead.
 
 ## What a Connector is
 
@@ -9,8 +17,8 @@ A Connector is a versioned package of Actions, and its source lives only in its 
 ## Anatomy of a Connector repo
 
 ```
-package.json      name, version, and this SDK pinned to a commit:
-                  "@atrium/connector-sdk": "git+ssh://git@ssh.dev.azure.com/v3/3HillsIT/Atrium%20Connector%20SDK/Atrium%20Connector%20SDK#<commit>"
+package.json      name, version, and this SDK pinned to an exact version:
+                  "@3hillsit/atrium-connector-sdk": "1.0.0-beta.1"
 bun.lock          committed: publish runs `bun install --frozen-lockfile`
 manifest.json     id, displayName, version, entry, actions, connection: the contract (below)
 src/connector.ts  defineConnector({ id, displayName, description, authTypes, configSchema, actions })
@@ -53,7 +61,7 @@ Changing the SDK itself: run `bun test` and `bun run typecheck`, and give every 
 In a Connector repo, run `bun test` and `bun run typecheck`. The existing repos carry:
 
 - **Per-Action tests:** `runAction(action, ctx, input)` with a stub `AtriumClient`, asserting the method and path sent, the result, downstream errors and rejected input.
-- **An end-to-end test:** the real `createAtriumClient` from `@atrium/connector-sdk/client` against a mock broker (`test/support/mock-broker.ts`, copied from this repo's) that proxies to a fake downstream server.
+- **An end-to-end test:** the real `createAtriumClient` from `@3hillsit/atrium-connector-sdk/client` against a mock broker (`test/support/mock-broker.ts`, copied from this repo's) that proxies to a fake downstream server.
 - **Export-surface parity:** every action in `connector.actions` is exported from `src/index.ts`, and the other way round.
 - **Manifest parity** (Vendira): the manifest's id, version and entry match the code and `package.json`; its actions, descriptions and `httpMethods` match the code; exactly the write Actions carry `write: true`; and each input schema's properties and `required` list match the zod schema.
 
