@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-beta.1
+
+0.4.0's code, published for the first time on public npm (#11227).
+
+- **Renamed** from `@atrium/connector-sdk` to `@3hillsit/atrium-connector-sdk`: the `@atrium` scope on npm isn't ours. Change the import paths and the dependency's name; nothing else changes.
+- The repo moved from Azure DevOps to public GitHub (`3HillsIT/atrium-connector-sdk`), MIT-licensed. Each publish runs from GitHub Actions with npm's trusted publishing and provenance, and needs a person's approval.
+
 ## 0.4.0
 
 Brings this repo level with the copy Atrium vendors in `backend/vendor/connector-sdk`, where the #10368 changes landed first. Atrium deletes that copy (#11019), so from here on this repo is the only SDK.

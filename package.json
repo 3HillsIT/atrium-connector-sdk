@@ -1,11 +1,24 @@
 {
-  "name": "@atrium/connector-sdk",
-  "version": "0.4.0",
-  "private": true,
+  "name": "@3hillsit/atrium-connector-sdk",
+  "version": "1.0.0-beta.1",
   "description": "SDK for authoring Atrium connectors and talking to the Atrium mediation broker without ever holding a raw credential.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/3HillsIT/atrium-connector-sdk.git"
+  },
+  "homepage": "https://github.com/3HillsIT/atrium-connector-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/3HillsIT/atrium-connector-sdk/issues"
+  },
   "type": "module",
   "module": "src/index.ts",
   "types": "src/index.ts",
+  "files": [
+    "src",
+    "examples",
+    "CHANGELOG.md"
+  ],
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -26,5 +39,8 @@
   "devDependencies": {
     "@types/bun": "^1.1.6",
     "typescript": "^5.5.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

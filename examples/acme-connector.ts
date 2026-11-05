@@ -1,6 +1,6 @@
 // A fictional, minimal connector for "Acme" — exists purely as a working,
 // readable reference for what authoring a real connector on top of
-// @atrium/connector-sdk looks like. Not a real integration.
+// @3hillsit/atrium-connector-sdk looks like. Not a real integration.
 
 import { defineConnector, defineAction, z } from '../src/index';
 
