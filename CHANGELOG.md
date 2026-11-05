@@ -1,6 +1,23 @@
 # Changelog
 
+## Version policy
+
+The SDK follows semantic versioning from 1.0.0:
+
+- **Breaking changes come only in a new major,** with migration steps in its entry here. That covers the authoring API (what `@3hillsit/atrium-connector-sdk` and `@3hillsit/atrium-connector-sdk/client` export) and the `atrium-connector` commands (`check`, `build`, `sign`, `keygen`): their options, their output files and their exit codes.
+- **Fixes land on the newest major only.**
+- **The SDK's version plays no part in what an Instance accepts.** Only the Bundle Contract version (`CURRENT_CONNECTOR_API_VERSION`) does, and the SDK is inlined into every bundle, so a Connector built with an older SDK major keeps running for as long as atrium accepts its Bundle Contract version.
+
+Versions before 1.0.0, the `1.0.0-beta.N` pre-releases included, make no promise.
+
 ## Unreleased
+
+The developer guide ships in the package (#11972, #11229).
+
+- **`docs/`, one page per topic,** in the npm package and on GitHub: concepts, manifest, actions, rules, testing, build and sign, versions, troubleshooting, and the guided build (a stub for now). `node_modules/@3hillsit/atrium-connector-sdk/docs/` describes exactly the SDK installed.
+- **The README is rewritten for a developer outside 3HillsIT:** what a Connector is, the quick start, the guide's pages, and the version policy above. 3HillsIT's own release steps moved to atrium's docs.
+- **The versions page states both promises:** atrium's (a Bundle Contract version leaves only in an atrium MAJOR, after an overlap Release and 90 days' notice) and the SDK's semver.
+- **Every refusal of `sign` and `keygen` names its guide page,** as `check`'s and `build`'s do: a last line `  Guide: node_modules/@3hillsit/atrium-connector-sdk/docs/<page>.md`, from three new rules (`key-file`, `signable-artifact`, `new-key`). A test checks every page a rule names exists and mentions the rule.
 
 The Connector Artifact format moves into the SDK (#11227; atrium's ADR-0007, Amendment from #11226).
 
