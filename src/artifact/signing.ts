@@ -190,7 +190,19 @@ export interface ParsedSignatureFile {
   blobBytes: Uint8Array;
 }
 
-export function parseSignatureFile(data: Uint8Array): ParsedSignatureFile {
+export interface ParseSignatureFileOptions {
+  /**
+   * Reads a file with no signature line, as `build` writes it, instead of
+   * refusing it as `signature-missing`. For the one caller that adds a
+   * signature (`sign`); every opener keeps the refusal.
+   */
+  allowUnsigned?: boolean;
+}
+
+export function parseSignatureFile(
+  data: Uint8Array,
+  options: ParseSignatureFileOptions = {},
+): ParsedSignatureFile {
   const lines = fromUtf8(data).split('\n');
   const headerAt = lines.indexOf(SIGNATURE_HEADER);
   if (headerAt === -1) {
@@ -213,7 +225,7 @@ export function parseSignatureFile(data: Uint8Array): ParsedSignatureFile {
     }
     signatures.push({ keyId: parts[0]!, alg: parts[1]!, signature: parts[2]! });
   }
-  if (signatures.length === 0) {
+  if (signatures.length === 0 && !options.allowUnsigned) {
     throw artifactError('signature-missing', 'The signature file carries no signatures.');
   }
 

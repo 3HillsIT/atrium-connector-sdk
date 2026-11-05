@@ -37,8 +37,15 @@ export { parseConnection, parseRequiredConnection } from './connection';
 
 // ── Writing one ─────────────────────────────────────────────────────────────
 
-export { writeEnvelope, writeEnvelopeParts } from './envelope';
-export type { EnvelopeParts, SignerKey, WriteEnvelopeParams, WrittenEnvelope } from './envelope';
+export { writeEnvelope, writeEnvelopeParts, addSignature } from './envelope';
+export type {
+  AddedSignature,
+  ArtifactSigner,
+  EnvelopeParts,
+  SignerKey,
+  WriteEnvelopeParams,
+  WrittenEnvelope,
+} from './envelope';
 
 /** The source each Action is bundled from: the bundle's half of the Bundle Contract. */
 export { actionWrapperSource } from './wrapper';
@@ -62,7 +69,12 @@ export {
   verifySignatures,
   verifySignatureFile,
 } from './signing';
-export type { GeneratedSigningKey, ParsedSignatureFile, SignatureVerification } from './signing';
+export type {
+  GeneratedSigningKey,
+  ParseSignatureFileOptions,
+  ParsedSignatureFile,
+  SignatureVerification,
+} from './signing';
 
 // ── ATRIUM-SIGNED.json ──────────────────────────────────────────────────────
 

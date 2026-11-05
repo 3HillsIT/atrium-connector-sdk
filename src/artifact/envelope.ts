@@ -20,11 +20,12 @@
 //
 // Binding: atrium's ADR-0007, the Connector Artifact format and store.
 
-import { artifactError } from './errors';
+import { ConnectorArtifactError, artifactError } from './errors';
 import { parseConnection, parseRequiredConnection } from './connection';
 import { digestsEqual, fromUtf8, sha256Hex, utf8 } from './digest';
 import { buildListing, checkListing, parseListing, serializeListing } from './listing';
 import {
+  SIGNATURE_ALG,
   parseSignatureFile,
   serializeSignatureFile,
   signBlob,
@@ -157,6 +158,79 @@ export async function writeEnvelope(params: WriteEnvelopeParams): Promise<Writte
     fileName: artifactFileName(params.manifest.id, params.manifest.version),
     payloadSha256: blob.payloadSha256,
   };
+}
+
+// --- adding a signature (the SDK's `sign`) -------------------------------
+
+/** A key that signs an existing Artifact, with the public half its signature is checked against. */
+export interface ArtifactSigner extends SignerKey {
+  /** Base64 SPKI: the half the new signature must verify with. */
+  publicKey: string;
+}
+
+export interface AddedSignature {
+  /** The Artifact with the signature in its payload.sig; payload.tar.gz is the same bytes. */
+  bytes: Uint8Array;
+  /** The Artifact as the signer's key alone opens it: every check an Instance makes on Add. */
+  opened: VerifiedArtifact;
+  /** Every key id payload.sig names now, in its order, the signer's included. */
+  signedBy: string[];
+  /** True when payload.sig already had a signature by this key, which the new one replaced. */
+  replaced: boolean;
+}
+
+/**
+ * Adds one signature to an Artifact, unsigned (as `build` writes it) or
+ * already signed (a rotation's second key). Only payload.sig changes: the
+ * payload, its listing and the signed blob are the bytes they were, so the
+ * payload digest an Instance records cannot move. A signature by the same key
+ * id is replaced where it stood, never doubled.
+ *
+ * Then the result is opened with the signer's public half as the only ring
+ * key, which checks the new signature and everything after it (payload
+ * digest, listing, manifest) as an Instance's Add does. A signature that
+ * doesn't verify (a private half that isn't the public half's) is refused as
+ * `signature-invalid`, and nothing is returned to write.
+ */
+export async function addSignature(bytes: Uint8Array, signer: ArtifactSigner): Promise<AddedSignature> {
+  const parts = readEnvelope(bytes);
+  const file = parseSignatureFile(parts.signature, { allowUnsigned: true });
+  const signature = await signBlob({
+    blob: file.blobBytes,
+    keyId: signer.keyId,
+    privateKey: signer.privateKey,
+  });
+
+  const at = file.signatures.findIndex((line) => line.keyId === signer.keyId);
+  const replaced = at !== -1;
+  const signatures = replaced
+    ? file.signatures.flatMap((line, index) =>
+        line.keyId !== signer.keyId ? [line] : index === at ? [signature] : [],
+      )
+    : [...file.signatures, signature];
+
+  const signed = writeEnvelopeParts({
+    payload: parts.payload,
+    signature: serializeSignatureFile(signatures, file.blobBytes),
+  });
+
+  let opened: VerifiedArtifact;
+  try {
+    opened = await openArtifact(signed, [
+      { keyId: signer.keyId, alg: SIGNATURE_ALG, publicKey: signer.publicKey, comment: 'the signer' },
+    ]);
+  } catch (err) {
+    if (err instanceof ConnectorArtifactError && err.code === 'signature-invalid') {
+      throw artifactError(
+        'signature-invalid',
+        `The signature made with key ${signer.keyId} does not verify with that key's public half: ` +
+          'the private half belongs to another key.',
+        { keyId: signer.keyId },
+      );
+    }
+    throw err;
+  }
+  return { bytes: signed, opened, signedBy: signatures.map((line) => line.keyId), replaced };
 }
 
 // --- the outer layer ----------------------------------------------------

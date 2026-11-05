@@ -20,6 +20,14 @@ The build moves into the SDK too, with a command to run it (#11227).
   - Both print which atrium Releases accept the Bundle Contract version built (v1: every atrium Release).
 - **The `write` rule:** an Action whose `httpMethods` (in manifest.json, or else in the code) include anything but GET, HEAD or OPTIONS must say `"write": true`, or `"write": false` when it only reads (a search sent as POST). `check` and `build` fail it otherwise. The published manifest still carries only `"write": true`.
 
+Signing moves out of atrium too: a customer's developer signs with their own Customer Key (#11227, #11228).
+
+- **`atrium-connector sign --key <file> <artifact>`** adds one signature line, made with the key file's private half, to the Artifact's `payload.sig`: an unsigned one `build` wrote, or one already signed (a key rotation's second key). The payload, its listing and the signed blob stay the same bytes, so the version and the payload digest don't move. A signature by the same key id is replaced where it stood, never doubled. Before the file is replaced, the result is opened with the key file's public half alone, as an Instance's Add would, so a key file whose private half isn't its public half's fails at signing. A refusal leaves the Artifact as it was. It needs no source and no repo: build in one place, sign in another.
+- **Key files** are the JSON `{keyId, privateKey, publicKey}` (base64 PKCS#8 and SPKI) that atrium's `keygen:signing` writes and the Console's Customer Key download writes with `name` and `account` added; other fields are ignored. `sign` refuses a file whose key id isn't derived from its public half (atrium's derivation: the first 8 bytes of SHA-256 over the SPKI, hex), or whose halves aren't P-256. Its messages name the file and never quote it.
+- **`atrium-connector keygen --name <name> --out <file>`** writes a new P-256 key file `{keyId, privateKey, publicKey, name}`, mode 600, never over an existing file. Standard output is exactly the two lines the Console's Register takes, `key-id <id>` and `public-key <base64 SPKI>`, so `keygen … > key.pub` is the paste; the private half is never printed. The name follows the Console's rule (at most 80 characters, no control characters).
+- **`addSignature(bytes, signer)`** in `./artifact` is `sign`'s core: it adds or replaces one signature and opens the result with the signer's public half. `parseSignatureFile(bytes, { allowUnsigned: true })` reads a `payload.sig` with no signature line; without the option it is still refused as `signature-missing`.
+- `build`'s last line names the `sign` command to run next.
+
 ## 1.0.0-beta.1
 
 0.4.0's code, published for the first time on public npm (#11227).
