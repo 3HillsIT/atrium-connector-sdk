@@ -77,7 +77,7 @@ Other top-level keys are left out of the published manifest. A `_comment` array 
 | `description` | What the AI model reads to choose the Tool. Write it for the model: what the Action does, what it returns, when to use it. It must equal the code's `description`. |
 | `inputSchema` | A JSON Schema object: what an AI client is shown. Its `properties` and `required` must match your zod `inputSchema`, which is what checks a call. |
 | `httpMethods` | The HTTP methods the handler sends, such as `["GET"]`. atrium treats it as documentation; `check` reads it for the `write-flag` rule. |
-| `write` | `true` if the Action changes anything in the system. Only `true` puts its Tools behind atrium's write approval. `false` says an Action that sends more than GET only reads (a search sent as POST). Leave it out for a GET-only read. See [rules.md](rules.md). |
+| `write` | `true` if the Action changes anything in the system. Only `true` puts its Tools behind atrium's write approval. `false` says an Action that sends more than GET only reads (a search sent as POST). Leave it out only for a read whose `httpMethods` say `GET`. See [rules.md](rules.md). |
 | `group` | Optional. The heading the Studio groups the Action under when an admin installs it ("Issues", "Projects"). The rule `action-group`: a non-empty string of at most 40 characters, trimmed. Leave it out rather than empty. |
 
 The rules that hold `actions` and your code together (`exports-and-names`, `parity`, `write-flag`) are on [rules.md](rules.md).
