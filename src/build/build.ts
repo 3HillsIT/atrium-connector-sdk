@@ -130,8 +130,8 @@ function installFrozen(packageDir: string): void {
   if (result.exitCode !== 0) {
     throw new BuildRefusal(
       'sdk-installed',
-      `\`bun install --frozen-lockfile\` failed in ${packageDir} — the lockfile is probably ` +
-        `stale, so run \`bun install\` there and commit it:\n${new TextDecoder().decode(result.stderr)}`,
+      `\`bun install --frozen-lockfile\` failed in ${packageDir}. The lockfile is probably ` +
+        `stale; run \`bun install\` there and commit it.\n${new TextDecoder().decode(result.stderr)}`,
     );
   }
 }
