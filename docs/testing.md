@@ -2,6 +2,8 @@
 
 Your tests run on your machine, with no Instance and no real system: atrium's broker holds the credentials, so a test never needs one. Read this page before you write tests.
 
+A repo `init` wrote starts with both kinds of test this page describes: one file per example Action (`test/list-items.test.ts`, `test/create-item.test.ts`, with the stand-in ctx in `test/stub-ctx.ts`) and the parity tests (`test/parity.test.ts`). Copy an Action's file for each Action you add.
+
 Run them with `bun test`, the types with `bun run typecheck` (`tsc --noEmit`), and finish with `bunx atrium-connector check`, which builds the Connector and runs the checks an Instance would.
 
 ## Per-Action tests with a stand-in ctx
@@ -72,10 +74,15 @@ The SDK's own repo has both stand-ins: `test/support/mock-broker.ts` and `test/s
 
 ## Manifest and code agree
 
-`check` holds `manifest.json` and your exports together (the `parity` and `exports-and-names` rules on [rules.md](rules.md)). A test of your own can hold more, in `bun test` where you run it most:
+`check` holds `manifest.json` and your exports together (the `parity` and `exports-and-names` rules on [rules.md](rules.md)). A test of your own can hold more, in `bun test` where you run it most. The parity tests `init` writes, `test/parity.test.ts`, hold each Action in the manifest to the code's:
 
-- exactly the Actions that change something have `"write": true`;
-- every property's type in the manifest's JSON Schema matches the zod schema's, which `check` doesn't compare.
+- the same Actions, exported under their names, and no other;
+- the same description, input properties and required list, as `check` compares;
+- every property's type in the manifest's JSON Schema matches the zod schema's, which `check` doesn't compare;
+- the same `httpMethods`;
+- exactly the Actions named in its `WRITE_ACTIONS` list have `"write": true`. Adding a write Action means adding its name there too: which Actions write is a decision written down twice, on purpose.
+
+They need no change as you add Actions, beyond `WRITE_ACTIONS`. A zod type they don't know (a union, say) is left out of the type comparison.
 
 ## Before you hand it over
 

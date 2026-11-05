@@ -44,18 +44,23 @@ Nothing is compiled on an Instance. The SDK is inlined into each bundle at build
 
 ## What a Connector repo holds
 
+`atrium-connector init` writes this layout, with one read and one write Action as examples ([build-and-sign.md](build-and-sign.md#init)):
+
 ```
 package.json        name, version, and this SDK pinned to an exact version
 bun.lock            committed, so a build months later bundles the same dependencies
 manifest.json       the contract atrium reads (manifest.md)
 src/index.ts        the manifest's entry: exports every Action
 src/actions/*.ts    one defineAction each (actions.md)
-test/               bun tests (testing.md)
+test/               bun tests: one file per Action, and the parity tests (testing.md)
 atrium-builds.json  the build record, committed (build-and-sign.md)
-dist/               the Artifacts build writes; leave it out of git
+dist/               the Artifacts build writes; .gitignore leaves it out of git
+AGENTS.md           for a coding agent: the commands, the rules, which page to read first
+CLAUDE.md           "@AGENTS.md", so Claude Code reads the same
+.claude/skills/build-connector/   the guided build as a Claude Code skill (guided-build.md)
 ```
 
-Only `manifest.json`, `package.json` and the entry module are required by the build; the rest is how a repo stays maintainable.
+Only `manifest.json`, `package.json` and the entry module are required by the build; the rest is how a repo stays maintainable. Keep `AGENTS.md` true as the repo grows: a coding agent follows it.
 
 ## Who supports what
 

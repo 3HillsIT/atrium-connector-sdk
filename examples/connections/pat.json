@@ -1,0 +1,24 @@
+{
+  "_comment": [
+    "Sign-in kind pat: the admin enters one token or API key on the Integration, and atrium sends it in one header.",
+    "Replace the example values: apiBasePath, a healthCheckPath that fails with a wrong credential, and the header the system reads. See docs/manifest.md in the SDK."
+  ],
+  "connection": {
+    "configSchema": {
+      "fields": [
+        {
+          "name": "instanceUrl",
+          "label": "Server URL",
+          "type": "string",
+          "required": true,
+          "description": "The address of the system, for example https://system.example.com"
+        }
+      ]
+    },
+    "request": {
+      "apiBasePath": "/api",
+      "healthCheckPath": "/me",
+      "auth": { "type": "pat", "headerName": "Authorization", "valuePrefix": "Bearer " }
+    }
+  }
+}

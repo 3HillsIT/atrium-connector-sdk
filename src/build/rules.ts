@@ -58,6 +58,8 @@ export const RULES = {
   'signable-artifact': { page: 'troubleshooting' },
   /** `keygen`: the key's name is one the Console takes, and the key file is a new file. */
   'new-key': { page: 'build-and-sign' },
+  /** `init`: the folder it writes the new repo into is empty. */
+  'new-repo': { page: 'build-and-sign' },
 } as const satisfies Record<string, { page: GuidePage }>;
 
 export type RuleName = keyof typeof RULES;

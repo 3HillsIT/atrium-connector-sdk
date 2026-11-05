@@ -1,8 +1,8 @@
-// A fictional, minimal connector for "Acme" — exists purely as a working,
+// A fictional, minimal connector for "Acme", the end-to-end test's: a working,
 // readable reference for what authoring a real connector on top of
 // @3hillsit/atrium-connector-sdk looks like. Not a real integration.
 
-import { defineConnector, defineAction, z } from '../src/index';
+import { defineConnector, defineAction, z } from '../../src/index';
 
 const listWidgets = defineAction({
   id: 'list-widgets',

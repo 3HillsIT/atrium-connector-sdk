@@ -1,6 +1,6 @@
 # Building and signing
 
-From a Connector repo to a signed Artifact an admin can Add: `check`, `build`, `sign`, and `keygen` for a key made outside the browser. Read this page before you build, sign or set up a pipeline.
+From a new Connector repo to a signed Artifact an admin can Add: `init`, `check`, `build`, `sign`, and `keygen` for a key made outside the browser. Read this page before you build, sign or set up a pipeline.
 
 ## What you need
 
@@ -18,10 +18,11 @@ Nothing else: no atrium checkout, no account with 3HillsIT, no network beyond in
 
 ## The commands
 
-Run each in the Connector repo (the folder holding `package.json` and `manifest.json`):
+Run each in the Connector repo (the folder holding `package.json` and `manifest.json`), except `init`, which makes one:
 
 | Command | What it does |
 |---|---|
+| `bunx -p @3hillsit/atrium-connector-sdk atrium-connector init [dir]` | Writes a new Connector repo into an empty folder. Asks the id, the display name and the sign-in kind. |
 | `bunx atrium-connector check` | Builds the Connector and checks it as an Instance would. Writes and signs nothing. |
 | `bunx atrium-connector build` | Does the same, then writes the unsigned Artifact to `dist/` and records it in `atrium-builds.json`. |
 | `bunx atrium-connector build --try` | The same, as the next try version of the manifest's version. |
@@ -29,6 +30,28 @@ Run each in the Connector repo (the folder holding `package.json` and `manifest.
 | `bunx atrium-connector keygen --name <name> --out <file>` | Makes a new signing key outside the browser. |
 
 Every command exits `0` when it did what it says, `1` when it refused (each refusal names a page of this guide), and `2` for a usage error. `bunx atrium-connector help` lists them.
+
+## init
+
+```
+$ bunx -p @3hillsit/atrium-connector-sdk atrium-connector init acme-tasks
+Connector id (letters, digits, '.', '_' and '-'; it starts every Tool's name and never changes): acme-tasks
+Display name (what the Studio shows): Acme Tasks
+How does the system take its credential?
+  1. pat          a token or API key, sent in one header
+  2. multi-header a secret in one header, and settings from the Integration in others
+  3. oauth2       Microsoft Entra ID, through the Instance's own Microsoft registration
+Sign-in kind (a name or 1-3): 1
+Wrote the Connector acme-tasks ("Acme Tasks") to /home/dev/acme-tasks.
+```
+
+`init` writes a Connector repo that passes its own tests and `check` before you change a line: `manifest.json` with your answers and an example `connection` block for the sign-in kind, one read and one write Action with their tests, the parity tests, `AGENTS.md` and `CLAUDE.md` for a coding agent, and an empty `atrium-builds.json`. Its `package.json` pins the SDK version that ran `init`. What each file is for is on [concepts.md](concepts.md#what-a-connector-repo-holds).
+
+- **Each answer is also an option:** `--id <id>`, `--display-name <name>`, `--sign-in pat|multi-header|oauth2`. It asks only for what the options leave out, and without a terminal (a script, CI) it asks nothing: an answer left out is a usage error.
+- **The folder** is `dir`, or the current one. It may not exist yet, or hold nothing but `.git`.
+- **It installs nothing.** Run `bun install` in the new repo, and commit `bun.lock`.
+
+Then replace the example values in the `connection` block (its `_comment` says which) and the example Actions with your system's ([manifest.md](manifest.md), [actions.md](actions.md)).
 
 ## check
 
@@ -299,6 +322,10 @@ A removed key can't bring in a new version. A Connector signed only by a key sin
 ### sdk-installed
 
 The build reads the Bundle Contract version off the SDK your repo resolves, so the SDK must be installed there: run `bun install`. If `bun install --frozen-lockfile` fails, the lockfile is stale: run `bun install` and commit `bun.lock`.
+
+### new-repo
+
+`init` writes only into an empty folder, and never over a file: the folder you named (or the current one) already holds something besides `.git`. Name a new folder, `init my-connector`, or empty this one. An id or a sign-in kind `init` refuses names [manifest.md](manifest.md) instead, where the id's rule and the three kinds are.
 
 ### build-record
 

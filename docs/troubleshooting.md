@@ -1,14 +1,14 @@
 # Troubleshooting
 
-What each refusal means and what to do about it: first those of `check`, `build`, `sign` and `keygen` on your machine, then those an Instance gives when an admin uploads or Adds your Artifact. Read this page when a command or the Studio refuses.
+What each refusal means and what to do about it: first those of `init`, `check`, `build`, `sign` and `keygen` on your machine, then those an Instance gives when an admin uploads or Adds your Artifact. Read this page when a command or the Studio refuses.
 
 ## On your machine
 
-`check` and `build` print each problem as `<rule>: <message>` with the guide page that explains the rule. `sign` and `keygen` print `sign failed: …` or `keygen failed: …` and their page. The message says what to change; the page says why the rule exists.
+`check` and `build` print each problem as `<rule>: <message>` with the guide page that explains the rule. `init`, `sign` and `keygen` print `init failed: …`, `sign failed: …` or `keygen failed: …` and their page. The message says what to change; the page says why the rule exists.
 
 | Rule | Page |
 |---|---|
-| `connector-package`, `sdk-installed`, `build-record` | [build-and-sign.md](build-and-sign.md#the-other-refusals-on-this-page) |
+| `connector-package`, `sdk-installed`, `new-repo`, `build-record` | [build-and-sign.md](build-and-sign.md#the-other-refusals-on-this-page) |
 | `manifest`, `connection`, `action-group` | [manifest.md](manifest.md) |
 | `versions` | [versions.md](versions.md#the-versions-rule) |
 | `exports-and-names`, `parity`, `write-flag`, `loads-cleanly` | [rules.md](rules.md) |
