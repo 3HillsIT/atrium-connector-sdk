@@ -1,0 +1,58 @@
+{
+  "id": "example",
+  "displayName": "Example",
+  "version": "0.1.0",
+  "entry": "src/index.ts",
+  "_comment": [
+    "Sign-in kind pat: the admin enters one token or API key on the Integration, and atrium sends it in one header.",
+    "Replace the example values: apiBasePath, a healthCheckPath that fails with a wrong credential, and the header the system reads. See docs/manifest.md in the SDK."
+  ],
+  "connection": {
+    "configSchema": {
+      "fields": [
+        {
+          "name": "instanceUrl",
+          "label": "Server URL",
+          "type": "string",
+          "required": true,
+          "description": "The address of the system, for example https://system.example.com"
+        }
+      ]
+    },
+    "request": {
+      "apiBasePath": "/api",
+      "healthCheckPath": "/me",
+      "auth": { "type": "pat", "headerName": "Authorization", "valuePrefix": "Bearer " }
+    }
+  },
+  "actions": [
+    {
+      "name": "list_items",
+      "description": "Lists the system's items, newest first, optionally only those with one status. Returns each item's id, name and status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["open", "closed"] },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 100 }
+        },
+        "required": []
+      },
+      "httpMethods": ["GET"],
+      "group": "Items"
+    },
+    {
+      "name": "create_item",
+      "description": "Creates an item with a name and returns its id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 }
+        },
+        "required": ["name"]
+      },
+      "httpMethods": ["POST"],
+      "write": true,
+      "group": "Items"
+    }
+  ]
+}

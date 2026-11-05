@@ -64,7 +64,7 @@ When the Studio marks your Connector: update the SDK to one that speaks the curr
 
 From 1.0.0, the SDK follows semantic versioning:
 
-- **Breaking changes only in a new major,** with migration steps in the [CHANGELOG](../CHANGELOG.md). That covers the authoring API (what `@3hillsit/atrium-connector-sdk` and `@3hillsit/atrium-connector-sdk/client` export) and the `atrium-connector` commands (`check`, `build`, `sign`, `keygen`), their options, their output files and their exit codes. A minor update never breaks your build.
+- **Breaking changes only in a new major,** with migration steps in the [CHANGELOG](../CHANGELOG.md). That covers the authoring API (what `@3hillsit/atrium-connector-sdk` and `@3hillsit/atrium-connector-sdk/client` export) and the `atrium-connector` commands (`init`, `check`, `build`, `sign`, `keygen`), their options, their output files and their exit codes. A minor update never breaks your build.
 - **Fixes land on the newest major only.** Staying on an older major is safe for what you have built (below), but it gets no more fixes.
 - **The SDK's version plays no part in what an Instance accepts.** Only the Bundle Contract version does. The SDK is inlined into every bundle, so a Connector built with an old SDK major keeps running for as long as atrium accepts its Bundle Contract version. You update the SDK when you choose to.
 

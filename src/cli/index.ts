@@ -7,6 +7,7 @@
 
 import { build } from './build';
 import { check } from './check';
+import { init } from './init';
 import { keygen } from './keygen';
 import { sign } from './sign';
 import type { CliIO, Command } from './io';
@@ -15,6 +16,7 @@ export type { CliIO, Command } from './io';
 export { consoleIO } from './io';
 
 export const COMMANDS: Record<string, Command> = {
+  init,
   check,
   build,
   sign,

@@ -4,13 +4,19 @@
 
 The SDK follows semantic versioning from 1.0.0:
 
-- **Breaking changes come only in a new major,** with migration steps in its entry here. That covers the authoring API (what `@3hillsit/atrium-connector-sdk` and `@3hillsit/atrium-connector-sdk/client` export) and the `atrium-connector` commands (`check`, `build`, `sign`, `keygen`): their options, their output files and their exit codes.
+- **Breaking changes come only in a new major,** with migration steps in its entry here. That covers the authoring API (what `@3hillsit/atrium-connector-sdk` and `@3hillsit/atrium-connector-sdk/client` export) and the `atrium-connector` commands (`init`, `check`, `build`, `sign`, `keygen`): their options, their output files and their exit codes.
 - **Fixes land on the newest major only.**
 - **The SDK's version plays no part in what an Instance accepts.** Only the Bundle Contract version (`CURRENT_CONNECTOR_API_VERSION`) does, and the SDK is inlined into every bundle, so a Connector built with an older SDK major keeps running for as long as atrium accepts its Bundle Contract version.
 
 Versions before 1.0.0, the `1.0.0-beta.N` pre-releases included, make no promise.
 
 ## Unreleased
+
+A new Connector starts from `init` (#11972).
+
+- **`atrium-connector init [dir]`** writes a Connector repo into an empty folder (or one holding only `.git`) that passes its own `bun test`, typecheck and `check` before anything is changed. It asks the Connector's id, its display name and its sign-in kind (`pat`, `multi-header`, `oauth2`); each is also an option (`--id`, `--display-name`, `--sign-in`), and without a terminal a missing one is a usage error. The repo: `manifest.json` with the answers and the kind's example `connection` block, one read and one write Action with their tests, the parity tests (descriptions, input properties, required list, property types, `httpMethods`, and the write Actions by name), an empty `atrium-builds.json`, `.gitignore`, `AGENTS.md` for a coding agent (the commands, the rules that break a Connector, which guide page to read before which task, and never running `sign`), `CLAUDE.md` (`@AGENTS.md`), the guided-build skill `.claude/skills/build-connector/` (a pointer to `docs/guided-build.md` for now), and a `package.json` pinning the SDK version that ran `init`. It never writes over a file, and installs nothing. A folder that isn't empty is refused under the new rule `new-repo`; an id or sign-in kind a manifest can't take, under `manifest` or `connection`.
+- **`examples/` is the repo `init` writes:** `examples/connector/`, with one `connection` block per sign-in kind in `examples/connections/`. The Acme example that was there moved into the SDK's own tests.
+- **CI runs `init` for each sign-in kind** from the packed SDK, then the written repo's `bun install`, tests, typecheck and `check` (`scripts/check-init.sh`, runnable locally).
 
 The developer guide ships in the package (#11972, #11229).
 

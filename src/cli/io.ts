@@ -14,6 +14,12 @@ export interface CliIO {
   err: (text: string) => void;
   /** The clock: when a build happened. */
   now: () => Date;
+  /**
+   * Asks a person at a terminal and returns their answer, or null when the
+   * input ended. Absent when nobody is there to answer (a pipe, CI, a test):
+   * a command then takes every answer as an option.
+   */
+  ask?: (question: string) => Promise<string | null>;
 }
 
 export interface Command {
@@ -31,6 +37,8 @@ export function consoleIO(): CliIO {
     out: (text) => process.stdout.write(text + '\n'),
     err: (text) => process.stderr.write(text + '\n'),
     now: () => new Date(),
+    // Bun's prompt() writes the question and reads one line from stdin.
+    ask: process.stdin.isTTY ? async (question) => prompt(question) : undefined,
   };
 }
 
@@ -38,31 +46,32 @@ export function consoleIO(): CliIO {
  * The command's own options, strictly: an unknown option or a stray argument
  * is a usage error (exit 2) naming the usage line, never ignored.
  * `positionals` is how many arguments the command takes besides its options
- * (`sign`'s Artifact: 1); any other number is a usage error too.
+ * (`sign`'s Artifact: 1), or the least and the most (`init [dir]`: [0, 1]);
+ * any other number is a usage error too.
  */
 export function parseCommandArgs<T extends NonNullable<ParseArgsConfig['options']>>(
   command: Pick<Command, 'usage'>,
   args: string[],
   options: T,
   io: CliIO,
-  positionals = 0,
+  positionals: number | [min: number, max: number] = 0,
 ): { values: Record<keyof T, unknown>; positionals: string[] } | undefined {
   const usageError = (message: string) => {
     io.err(`${message}\nusage: atrium-connector ${command.usage}`);
     return undefined;
   };
+  const [least, most] = typeof positionals === 'number' ? [positionals, positionals] : positionals;
   let parsed: { values: Record<string, unknown>; positionals: string[] };
   try {
-    parsed = parseArgs({ args, options, strict: true, allowPositionals: positionals > 0 });
+    parsed = parseArgs({ args, options, strict: true, allowPositionals: most > 0 });
   } catch (err) {
     return usageError(err instanceof Error ? err.message : String(err));
   }
-  if (parsed.positionals.length !== positionals) {
-    return usageError(
-      parsed.positionals.length < positionals
-        ? `Missing ${plural(positionals - parsed.positionals.length, 'argument', 'arguments')}.`
-        : `Unexpected argument '${parsed.positionals[positionals]}'.`,
-    );
+  if (parsed.positionals.length < least) {
+    return usageError(`Missing ${plural(least - parsed.positionals.length, 'argument', 'arguments')}.`);
+  }
+  if (parsed.positionals.length > most) {
+    return usageError(`Unexpected argument '${parsed.positionals[most]}'.`);
   }
   return {
     values: parsed.values as unknown as Record<keyof T, unknown>,

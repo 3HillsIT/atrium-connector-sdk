@@ -110,7 +110,7 @@ A Tool installed from your Action is named `<connectorId>_<actionName>`. atrium 
 
 1. Write `src/actions/<name>.ts` with `defineAction`.
 2. Export it from `src/index.ts`.
-3. Add it to `actions` in `manifest.json`: `name` equal to the `id`, the same description, the JSON Schema, `httpMethods`, and `"write": true` if it changes anything.
+3. Add it to `actions` in `manifest.json`: `name` equal to the `id`, the same description, the JSON Schema, `httpMethods`, and `"write": true` if it changes anything. A write Action's name also goes in `WRITE_ACTIONS` in `test/parity.test.ts`, if `init` wrote your repo.
 4. Write its tests ([testing.md](testing.md)).
 5. Run `bun test` and `bunx atrium-connector check`.
 6. Before it ships, raise `version` in `package.json` and `manifest.json` together ([versions.md](versions.md)).

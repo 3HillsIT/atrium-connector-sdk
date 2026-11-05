@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { createAtriumClient } from '../src/client';
 import { runAction } from '../src/connector';
-import { acmeConnector } from '../examples/acme-connector';
+import { acmeConnector } from './support/acme-connector';
 import { startMockAtriumBroker, type MockAtriumBroker } from './support/mock-broker';
 import { startFakeDownstream, type FakeDownstreamServer } from './support/fake-downstream';
 

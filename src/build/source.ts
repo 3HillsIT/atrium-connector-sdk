@@ -62,7 +62,7 @@ export interface ConnectorSource {
  * The catalogue artifact atrium's Registry lists lives at the repository's
  * `index` location, so a Connector called `index` would publish on top of it.
  */
-const RESERVED_CONNECTOR_IDS = new Set(['index']);
+export const RESERVED_CONNECTOR_IDS = new Set(['index']);
 
 /**
  * An Action name has to survive as `actions/<name>.js` inside a signed
