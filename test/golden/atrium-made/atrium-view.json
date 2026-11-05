@@ -1,0 +1,519 @@
+{
+  "recordedWith": {
+    "atriumCommit": "8a18f6d57f98c0bb4b05cea2ea1b8065e44098e4",
+    "bun": "1.3.14",
+    "recordedAt": "2026-11-05T21:55:01.081Z"
+  },
+  "artifactSha256": "6e5cc9e5786e5b44d59e69f4a1cabadea452a4d5b2dd5586473abe4d1a722a95",
+  "envelope": {
+    "payloadSha256": "a22e1aac37e5c28db04406e886a21ff74f29cfaeb5557bd86990ff52a0b83c51",
+    "signatureSha256": "0598a408188b1f22e9155b6bef0748a5227afbfbc8e7a420f94810810eba82ac"
+  },
+  "signedBy": [
+    "golden-a",
+    "golden-b"
+  ],
+  "opens": [
+    {
+      "ring": [
+        "golden-a",
+        "golden-b"
+      ],
+      "opened": {
+        "keyId": "3874fb21fbd27e95",
+        "publishedAt": "2026-11-05T21:55:01.056Z",
+        "payloadSha256": "a22e1aac37e5c28db04406e886a21ff74f29cfaeb5557bd86990ff52a0b83c51",
+        "manifest": {
+          "manifestVersion": 3,
+          "id": "golden-connector",
+          "displayName": "Golden Connector",
+          "version": "1.0.0-rc.1",
+          "connectorApiVersion": 1,
+          "actions": [
+            {
+              "name": "list_things",
+              "description": "Lists things.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              },
+              "bundle": "actions/list_things.js",
+              "httpMethods": [
+                "GET"
+              ],
+              "group": "Things"
+            },
+            {
+              "name": "create_thing",
+              "description": "Creates a thing.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              },
+              "bundle": "actions/create_thing.js",
+              "httpMethods": [
+                "POST"
+              ],
+              "write": true,
+              "group": "Things"
+            }
+          ],
+          "publishedWith": {
+            "bun": "1.3.14"
+          },
+          "connection": {
+            "configSchema": {
+              "fields": [
+                {
+                  "name": "instanceUrl",
+                  "label": "Instance URL",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "authMethod",
+                  "label": "Auth method",
+                  "type": "string",
+                  "required": false,
+                  "default": "token"
+                }
+              ]
+            },
+            "request": {
+              "apiBasePath": "/services/rest",
+              "healthCheckPath": "/me",
+              "auth": {
+                "type": "multi-header",
+                "secretHeader": "tokenId",
+                "staticHeadersFromConfig": {
+                  "authMethod": "authMethod"
+                }
+              }
+            }
+          }
+        },
+        "listing": {
+          "listingVersion": 1,
+          "id": "golden-connector",
+          "version": "1.0.0-rc.1",
+          "files": [
+            {
+              "path": "actions/create_thing.js",
+              "sha256": "28b4731c785119b8f65c6660efe5596bde8d6c9d48afc8cfe11a5ce04966fdda",
+              "size": 1648
+            },
+            {
+              "path": "actions/list_things.js",
+              "sha256": "f8b905c82f4a460c9b46462312e9a7e39e47332b684da8a8115664378ec2a1c9",
+              "size": 1646
+            },
+            {
+              "path": "manifest.json",
+              "sha256": "ba2e927fdc8d0a55411a87885b048f7a92a38a01a9467081efe0f3bffc7daac2",
+              "size": 1668
+            }
+          ]
+        },
+        "files": {
+          "ATRIUM-SIGNED.json": "9a09cde83bac4f35e24f7dcadbd5ef55ee3b341de5606d52a9ab46570f3a25d0",
+          "actions/create_thing.js": "28b4731c785119b8f65c6660efe5596bde8d6c9d48afc8cfe11a5ce04966fdda",
+          "actions/list_things.js": "f8b905c82f4a460c9b46462312e9a7e39e47332b684da8a8115664378ec2a1c9",
+          "manifest.json": "ba2e927fdc8d0a55411a87885b048f7a92a38a01a9467081efe0f3bffc7daac2"
+        }
+      }
+    },
+    {
+      "ring": [
+        "golden-b",
+        "golden-a"
+      ],
+      "opened": {
+        "keyId": "3874fb21fbd27e95",
+        "publishedAt": "2026-11-05T21:55:01.056Z",
+        "payloadSha256": "a22e1aac37e5c28db04406e886a21ff74f29cfaeb5557bd86990ff52a0b83c51",
+        "manifest": {
+          "manifestVersion": 3,
+          "id": "golden-connector",
+          "displayName": "Golden Connector",
+          "version": "1.0.0-rc.1",
+          "connectorApiVersion": 1,
+          "actions": [
+            {
+              "name": "list_things",
+              "description": "Lists things.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              },
+              "bundle": "actions/list_things.js",
+              "httpMethods": [
+                "GET"
+              ],
+              "group": "Things"
+            },
+            {
+              "name": "create_thing",
+              "description": "Creates a thing.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              },
+              "bundle": "actions/create_thing.js",
+              "httpMethods": [
+                "POST"
+              ],
+              "write": true,
+              "group": "Things"
+            }
+          ],
+          "publishedWith": {
+            "bun": "1.3.14"
+          },
+          "connection": {
+            "configSchema": {
+              "fields": [
+                {
+                  "name": "instanceUrl",
+                  "label": "Instance URL",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "authMethod",
+                  "label": "Auth method",
+                  "type": "string",
+                  "required": false,
+                  "default": "token"
+                }
+              ]
+            },
+            "request": {
+              "apiBasePath": "/services/rest",
+              "healthCheckPath": "/me",
+              "auth": {
+                "type": "multi-header",
+                "secretHeader": "tokenId",
+                "staticHeadersFromConfig": {
+                  "authMethod": "authMethod"
+                }
+              }
+            }
+          }
+        },
+        "listing": {
+          "listingVersion": 1,
+          "id": "golden-connector",
+          "version": "1.0.0-rc.1",
+          "files": [
+            {
+              "path": "actions/create_thing.js",
+              "sha256": "28b4731c785119b8f65c6660efe5596bde8d6c9d48afc8cfe11a5ce04966fdda",
+              "size": 1648
+            },
+            {
+              "path": "actions/list_things.js",
+              "sha256": "f8b905c82f4a460c9b46462312e9a7e39e47332b684da8a8115664378ec2a1c9",
+              "size": 1646
+            },
+            {
+              "path": "manifest.json",
+              "sha256": "ba2e927fdc8d0a55411a87885b048f7a92a38a01a9467081efe0f3bffc7daac2",
+              "size": 1668
+            }
+          ]
+        },
+        "files": {
+          "ATRIUM-SIGNED.json": "9a09cde83bac4f35e24f7dcadbd5ef55ee3b341de5606d52a9ab46570f3a25d0",
+          "actions/create_thing.js": "28b4731c785119b8f65c6660efe5596bde8d6c9d48afc8cfe11a5ce04966fdda",
+          "actions/list_things.js": "f8b905c82f4a460c9b46462312e9a7e39e47332b684da8a8115664378ec2a1c9",
+          "manifest.json": "ba2e927fdc8d0a55411a87885b048f7a92a38a01a9467081efe0f3bffc7daac2"
+        }
+      }
+    },
+    {
+      "ring": [
+        "golden-b"
+      ],
+      "opened": {
+        "keyId": "3f2d4b3485508d3f",
+        "publishedAt": "2026-11-05T21:55:01.056Z",
+        "payloadSha256": "a22e1aac37e5c28db04406e886a21ff74f29cfaeb5557bd86990ff52a0b83c51",
+        "manifest": {
+          "manifestVersion": 3,
+          "id": "golden-connector",
+          "displayName": "Golden Connector",
+          "version": "1.0.0-rc.1",
+          "connectorApiVersion": 1,
+          "actions": [
+            {
+              "name": "list_things",
+              "description": "Lists things.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              },
+              "bundle": "actions/list_things.js",
+              "httpMethods": [
+                "GET"
+              ],
+              "group": "Things"
+            },
+            {
+              "name": "create_thing",
+              "description": "Creates a thing.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              },
+              "bundle": "actions/create_thing.js",
+              "httpMethods": [
+                "POST"
+              ],
+              "write": true,
+              "group": "Things"
+            }
+          ],
+          "publishedWith": {
+            "bun": "1.3.14"
+          },
+          "connection": {
+            "configSchema": {
+              "fields": [
+                {
+                  "name": "instanceUrl",
+                  "label": "Instance URL",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "authMethod",
+                  "label": "Auth method",
+                  "type": "string",
+                  "required": false,
+                  "default": "token"
+                }
+              ]
+            },
+            "request": {
+              "apiBasePath": "/services/rest",
+              "healthCheckPath": "/me",
+              "auth": {
+                "type": "multi-header",
+                "secretHeader": "tokenId",
+                "staticHeadersFromConfig": {
+                  "authMethod": "authMethod"
+                }
+              }
+            }
+          }
+        },
+        "listing": {
+          "listingVersion": 1,
+          "id": "golden-connector",
+          "version": "1.0.0-rc.1",
+          "files": [
+            {
+              "path": "actions/create_thing.js",
+              "sha256": "28b4731c785119b8f65c6660efe5596bde8d6c9d48afc8cfe11a5ce04966fdda",
+              "size": 1648
+            },
+            {
+              "path": "actions/list_things.js",
+              "sha256": "f8b905c82f4a460c9b46462312e9a7e39e47332b684da8a8115664378ec2a1c9",
+              "size": 1646
+            },
+            {
+              "path": "manifest.json",
+              "sha256": "ba2e927fdc8d0a55411a87885b048f7a92a38a01a9467081efe0f3bffc7daac2",
+              "size": 1668
+            }
+          ]
+        },
+        "files": {
+          "ATRIUM-SIGNED.json": "9a09cde83bac4f35e24f7dcadbd5ef55ee3b341de5606d52a9ab46570f3a25d0",
+          "actions/create_thing.js": "28b4731c785119b8f65c6660efe5596bde8d6c9d48afc8cfe11a5ce04966fdda",
+          "actions/list_things.js": "f8b905c82f4a460c9b46462312e9a7e39e47332b684da8a8115664378ec2a1c9",
+          "manifest.json": "ba2e927fdc8d0a55411a87885b048f7a92a38a01a9467081efe0f3bffc7daac2"
+        }
+      }
+    },
+    {
+      "ring": [
+        "golden-release",
+        "golden-b"
+      ],
+      "opened": {
+        "keyId": "3f2d4b3485508d3f",
+        "publishedAt": "2026-11-05T21:55:01.056Z",
+        "payloadSha256": "a22e1aac37e5c28db04406e886a21ff74f29cfaeb5557bd86990ff52a0b83c51",
+        "manifest": {
+          "manifestVersion": 3,
+          "id": "golden-connector",
+          "displayName": "Golden Connector",
+          "version": "1.0.0-rc.1",
+          "connectorApiVersion": 1,
+          "actions": [
+            {
+              "name": "list_things",
+              "description": "Lists things.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              },
+              "bundle": "actions/list_things.js",
+              "httpMethods": [
+                "GET"
+              ],
+              "group": "Things"
+            },
+            {
+              "name": "create_thing",
+              "description": "Creates a thing.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              },
+              "bundle": "actions/create_thing.js",
+              "httpMethods": [
+                "POST"
+              ],
+              "write": true,
+              "group": "Things"
+            }
+          ],
+          "publishedWith": {
+            "bun": "1.3.14"
+          },
+          "connection": {
+            "configSchema": {
+              "fields": [
+                {
+                  "name": "instanceUrl",
+                  "label": "Instance URL",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "authMethod",
+                  "label": "Auth method",
+                  "type": "string",
+                  "required": false,
+                  "default": "token"
+                }
+              ]
+            },
+            "request": {
+              "apiBasePath": "/services/rest",
+              "healthCheckPath": "/me",
+              "auth": {
+                "type": "multi-header",
+                "secretHeader": "tokenId",
+                "staticHeadersFromConfig": {
+                  "authMethod": "authMethod"
+                }
+              }
+            }
+          }
+        },
+        "listing": {
+          "listingVersion": 1,
+          "id": "golden-connector",
+          "version": "1.0.0-rc.1",
+          "files": [
+            {
+              "path": "actions/create_thing.js",
+              "sha256": "28b4731c785119b8f65c6660efe5596bde8d6c9d48afc8cfe11a5ce04966fdda",
+              "size": 1648
+            },
+            {
+              "path": "actions/list_things.js",
+              "sha256": "f8b905c82f4a460c9b46462312e9a7e39e47332b684da8a8115664378ec2a1c9",
+              "size": 1646
+            },
+            {
+              "path": "manifest.json",
+              "sha256": "ba2e927fdc8d0a55411a87885b048f7a92a38a01a9467081efe0f3bffc7daac2",
+              "size": 1668
+            }
+          ]
+        },
+        "files": {
+          "ATRIUM-SIGNED.json": "9a09cde83bac4f35e24f7dcadbd5ef55ee3b341de5606d52a9ab46570f3a25d0",
+          "actions/create_thing.js": "28b4731c785119b8f65c6660efe5596bde8d6c9d48afc8cfe11a5ce04966fdda",
+          "actions/list_things.js": "f8b905c82f4a460c9b46462312e9a7e39e47332b684da8a8115664378ec2a1c9",
+          "manifest.json": "ba2e927fdc8d0a55411a87885b048f7a92a38a01a9467081efe0f3bffc7daac2"
+        }
+      }
+    },
+    {
+      "ring": [
+        "golden-release"
+      ],
+      "refused": {
+        "code": "unknown-key",
+        "message": "This artifact was signed with a key this atrium Version does not trust (key 3874fb21fbd27e95, 3f2d4b3485508d3f). It was most likely published after your atrium Release. Update atrium, or request an artifact signed with a key this version carries.",
+        "details": {
+          "keyIds": "3874fb21fbd27e95, 3f2d4b3485508d3f"
+        }
+      }
+    },
+    {
+      "ring": [],
+      "refused": {
+        "code": "unknown-key",
+        "message": "This artifact was signed with a key this atrium Version does not trust (key 3874fb21fbd27e95, 3f2d4b3485508d3f). It was most likely published after your atrium Release. Update atrium, or request an artifact signed with a key this version carries.",
+        "details": {
+          "keyIds": "3874fb21fbd27e95, 3f2d4b3485508d3f"
+        }
+      }
+    }
+  ]
+}

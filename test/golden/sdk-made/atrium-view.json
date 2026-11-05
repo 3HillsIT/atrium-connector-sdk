@@ -1,0 +1,463 @@
+{
+  "recordedWith": {
+    "atriumCommit": "8a18f6d57f98c0bb4b05cea2ea1b8065e44098e4",
+    "bun": "1.3.14",
+    "recordedAt": "2026-11-05T21:55:01.100Z"
+  },
+  "artifactSha256": "eb1aa09f81aaa6738a16b677a9ad919e48959667b8391ee6acfc5c96949ff8b4",
+  "envelope": {
+    "payloadSha256": "dda407845ac9ea7a82842ae07b593ab6f1a67ab1221f70f1964c4e84eac9cf8e",
+    "signatureSha256": "8ae08b13520a3c1ea6d6ac46d2cd42225083b071c8a268f12a30eb8d9a648e9d"
+  },
+  "signedBy": [
+    "golden-c",
+    "golden-d"
+  ],
+  "opens": [
+    {
+      "ring": [
+        "golden-c",
+        "golden-d"
+      ],
+      "opened": {
+        "keyId": "5ab59f9c14d340af",
+        "publishedAt": "2026-11-05T12:00:00.000Z",
+        "payloadSha256": "dda407845ac9ea7a82842ae07b593ab6f1a67ab1221f70f1964c4e84eac9cf8e",
+        "manifest": {
+          "manifestVersion": 3,
+          "id": "golden-sdk",
+          "displayName": "Golden SDK Connector",
+          "version": "2.1.0-try.3",
+          "connectorApiVersion": 1,
+          "actions": [
+            {
+              "name": "list_projects",
+              "description": "Lists projects.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "required": []
+              },
+              "bundle": "actions/list_projects.js",
+              "httpMethods": [
+                "GET"
+              ],
+              "group": "Projects"
+            },
+            {
+              "name": "update_project",
+              "description": "Updates a project.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              },
+              "bundle": "actions/update_project.js",
+              "httpMethods": [
+                "PATCH"
+              ],
+              "write": true
+            }
+          ],
+          "publishedWith": {
+            "bun": "1.3.14"
+          },
+          "connection": {
+            "configSchema": {
+              "fields": [
+                {
+                  "name": "organization",
+                  "label": "Organization",
+                  "type": "string",
+                  "required": true
+                }
+              ]
+            },
+            "request": {
+              "apiBasePath": "https://dev.example.test/{organization}",
+              "healthCheckPath": "/_apis/projects",
+              "auth": {
+                "type": "oauth2",
+                "scope": "api://golden/.default"
+              }
+            }
+          },
+          "code": "GS"
+        },
+        "listing": {
+          "listingVersion": 1,
+          "id": "golden-sdk",
+          "version": "2.1.0-try.3",
+          "files": [
+            {
+              "path": "actions/list_projects.js",
+              "sha256": "b7125054f107451a53056713a9df015639a028c92b9f9a140b55c4e9b3663afe",
+              "size": 155
+            },
+            {
+              "path": "actions/update_project.js",
+              "sha256": "70eeb7a20fd44d970877e43addfffa7f53a15711fed8fc00e245df18d7b05de2",
+              "size": 159
+            },
+            {
+              "path": "manifest.json",
+              "sha256": "6f6ba328dd499eff1a907e159a80d143d4e32ced2d415dc07693b6e3362d4963",
+              "size": 1378
+            }
+          ]
+        },
+        "files": {
+          "ATRIUM-SIGNED.json": "dafca941cf82efdcc9535a59aea6a0b8e59e477584adbd722d1b328ce9efe1dc",
+          "actions/list_projects.js": "b7125054f107451a53056713a9df015639a028c92b9f9a140b55c4e9b3663afe",
+          "actions/update_project.js": "70eeb7a20fd44d970877e43addfffa7f53a15711fed8fc00e245df18d7b05de2",
+          "manifest.json": "6f6ba328dd499eff1a907e159a80d143d4e32ced2d415dc07693b6e3362d4963"
+        }
+      }
+    },
+    {
+      "ring": [
+        "golden-d",
+        "golden-c"
+      ],
+      "opened": {
+        "keyId": "5ab59f9c14d340af",
+        "publishedAt": "2026-11-05T12:00:00.000Z",
+        "payloadSha256": "dda407845ac9ea7a82842ae07b593ab6f1a67ab1221f70f1964c4e84eac9cf8e",
+        "manifest": {
+          "manifestVersion": 3,
+          "id": "golden-sdk",
+          "displayName": "Golden SDK Connector",
+          "version": "2.1.0-try.3",
+          "connectorApiVersion": 1,
+          "actions": [
+            {
+              "name": "list_projects",
+              "description": "Lists projects.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "required": []
+              },
+              "bundle": "actions/list_projects.js",
+              "httpMethods": [
+                "GET"
+              ],
+              "group": "Projects"
+            },
+            {
+              "name": "update_project",
+              "description": "Updates a project.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              },
+              "bundle": "actions/update_project.js",
+              "httpMethods": [
+                "PATCH"
+              ],
+              "write": true
+            }
+          ],
+          "publishedWith": {
+            "bun": "1.3.14"
+          },
+          "connection": {
+            "configSchema": {
+              "fields": [
+                {
+                  "name": "organization",
+                  "label": "Organization",
+                  "type": "string",
+                  "required": true
+                }
+              ]
+            },
+            "request": {
+              "apiBasePath": "https://dev.example.test/{organization}",
+              "healthCheckPath": "/_apis/projects",
+              "auth": {
+                "type": "oauth2",
+                "scope": "api://golden/.default"
+              }
+            }
+          },
+          "code": "GS"
+        },
+        "listing": {
+          "listingVersion": 1,
+          "id": "golden-sdk",
+          "version": "2.1.0-try.3",
+          "files": [
+            {
+              "path": "actions/list_projects.js",
+              "sha256": "b7125054f107451a53056713a9df015639a028c92b9f9a140b55c4e9b3663afe",
+              "size": 155
+            },
+            {
+              "path": "actions/update_project.js",
+              "sha256": "70eeb7a20fd44d970877e43addfffa7f53a15711fed8fc00e245df18d7b05de2",
+              "size": 159
+            },
+            {
+              "path": "manifest.json",
+              "sha256": "6f6ba328dd499eff1a907e159a80d143d4e32ced2d415dc07693b6e3362d4963",
+              "size": 1378
+            }
+          ]
+        },
+        "files": {
+          "ATRIUM-SIGNED.json": "dafca941cf82efdcc9535a59aea6a0b8e59e477584adbd722d1b328ce9efe1dc",
+          "actions/list_projects.js": "b7125054f107451a53056713a9df015639a028c92b9f9a140b55c4e9b3663afe",
+          "actions/update_project.js": "70eeb7a20fd44d970877e43addfffa7f53a15711fed8fc00e245df18d7b05de2",
+          "manifest.json": "6f6ba328dd499eff1a907e159a80d143d4e32ced2d415dc07693b6e3362d4963"
+        }
+      }
+    },
+    {
+      "ring": [
+        "golden-d"
+      ],
+      "opened": {
+        "keyId": "cd47432398668b46",
+        "publishedAt": "2026-11-05T12:00:00.000Z",
+        "payloadSha256": "dda407845ac9ea7a82842ae07b593ab6f1a67ab1221f70f1964c4e84eac9cf8e",
+        "manifest": {
+          "manifestVersion": 3,
+          "id": "golden-sdk",
+          "displayName": "Golden SDK Connector",
+          "version": "2.1.0-try.3",
+          "connectorApiVersion": 1,
+          "actions": [
+            {
+              "name": "list_projects",
+              "description": "Lists projects.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "required": []
+              },
+              "bundle": "actions/list_projects.js",
+              "httpMethods": [
+                "GET"
+              ],
+              "group": "Projects"
+            },
+            {
+              "name": "update_project",
+              "description": "Updates a project.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              },
+              "bundle": "actions/update_project.js",
+              "httpMethods": [
+                "PATCH"
+              ],
+              "write": true
+            }
+          ],
+          "publishedWith": {
+            "bun": "1.3.14"
+          },
+          "connection": {
+            "configSchema": {
+              "fields": [
+                {
+                  "name": "organization",
+                  "label": "Organization",
+                  "type": "string",
+                  "required": true
+                }
+              ]
+            },
+            "request": {
+              "apiBasePath": "https://dev.example.test/{organization}",
+              "healthCheckPath": "/_apis/projects",
+              "auth": {
+                "type": "oauth2",
+                "scope": "api://golden/.default"
+              }
+            }
+          },
+          "code": "GS"
+        },
+        "listing": {
+          "listingVersion": 1,
+          "id": "golden-sdk",
+          "version": "2.1.0-try.3",
+          "files": [
+            {
+              "path": "actions/list_projects.js",
+              "sha256": "b7125054f107451a53056713a9df015639a028c92b9f9a140b55c4e9b3663afe",
+              "size": 155
+            },
+            {
+              "path": "actions/update_project.js",
+              "sha256": "70eeb7a20fd44d970877e43addfffa7f53a15711fed8fc00e245df18d7b05de2",
+              "size": 159
+            },
+            {
+              "path": "manifest.json",
+              "sha256": "6f6ba328dd499eff1a907e159a80d143d4e32ced2d415dc07693b6e3362d4963",
+              "size": 1378
+            }
+          ]
+        },
+        "files": {
+          "ATRIUM-SIGNED.json": "dafca941cf82efdcc9535a59aea6a0b8e59e477584adbd722d1b328ce9efe1dc",
+          "actions/list_projects.js": "b7125054f107451a53056713a9df015639a028c92b9f9a140b55c4e9b3663afe",
+          "actions/update_project.js": "70eeb7a20fd44d970877e43addfffa7f53a15711fed8fc00e245df18d7b05de2",
+          "manifest.json": "6f6ba328dd499eff1a907e159a80d143d4e32ced2d415dc07693b6e3362d4963"
+        }
+      }
+    },
+    {
+      "ring": [
+        "golden-release",
+        "golden-d"
+      ],
+      "opened": {
+        "keyId": "cd47432398668b46",
+        "publishedAt": "2026-11-05T12:00:00.000Z",
+        "payloadSha256": "dda407845ac9ea7a82842ae07b593ab6f1a67ab1221f70f1964c4e84eac9cf8e",
+        "manifest": {
+          "manifestVersion": 3,
+          "id": "golden-sdk",
+          "displayName": "Golden SDK Connector",
+          "version": "2.1.0-try.3",
+          "connectorApiVersion": 1,
+          "actions": [
+            {
+              "name": "list_projects",
+              "description": "Lists projects.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "required": []
+              },
+              "bundle": "actions/list_projects.js",
+              "httpMethods": [
+                "GET"
+              ],
+              "group": "Projects"
+            },
+            {
+              "name": "update_project",
+              "description": "Updates a project.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              },
+              "bundle": "actions/update_project.js",
+              "httpMethods": [
+                "PATCH"
+              ],
+              "write": true
+            }
+          ],
+          "publishedWith": {
+            "bun": "1.3.14"
+          },
+          "connection": {
+            "configSchema": {
+              "fields": [
+                {
+                  "name": "organization",
+                  "label": "Organization",
+                  "type": "string",
+                  "required": true
+                }
+              ]
+            },
+            "request": {
+              "apiBasePath": "https://dev.example.test/{organization}",
+              "healthCheckPath": "/_apis/projects",
+              "auth": {
+                "type": "oauth2",
+                "scope": "api://golden/.default"
+              }
+            }
+          },
+          "code": "GS"
+        },
+        "listing": {
+          "listingVersion": 1,
+          "id": "golden-sdk",
+          "version": "2.1.0-try.3",
+          "files": [
+            {
+              "path": "actions/list_projects.js",
+              "sha256": "b7125054f107451a53056713a9df015639a028c92b9f9a140b55c4e9b3663afe",
+              "size": 155
+            },
+            {
+              "path": "actions/update_project.js",
+              "sha256": "70eeb7a20fd44d970877e43addfffa7f53a15711fed8fc00e245df18d7b05de2",
+              "size": 159
+            },
+            {
+              "path": "manifest.json",
+              "sha256": "6f6ba328dd499eff1a907e159a80d143d4e32ced2d415dc07693b6e3362d4963",
+              "size": 1378
+            }
+          ]
+        },
+        "files": {
+          "ATRIUM-SIGNED.json": "dafca941cf82efdcc9535a59aea6a0b8e59e477584adbd722d1b328ce9efe1dc",
+          "actions/list_projects.js": "b7125054f107451a53056713a9df015639a028c92b9f9a140b55c4e9b3663afe",
+          "actions/update_project.js": "70eeb7a20fd44d970877e43addfffa7f53a15711fed8fc00e245df18d7b05de2",
+          "manifest.json": "6f6ba328dd499eff1a907e159a80d143d4e32ced2d415dc07693b6e3362d4963"
+        }
+      }
+    },
+    {
+      "ring": [
+        "golden-release"
+      ],
+      "refused": {
+        "code": "unknown-key",
+        "message": "This artifact was signed with a key this atrium Version does not trust (key 5ab59f9c14d340af, cd47432398668b46). It was most likely published after your atrium Release. Update atrium, or request an artifact signed with a key this version carries.",
+        "details": {
+          "keyIds": "5ab59f9c14d340af, cd47432398668b46"
+        }
+      }
+    },
+    {
+      "ring": [],
+      "refused": {
+        "code": "unknown-key",
+        "message": "This artifact was signed with a key this atrium Version does not trust (key 5ab59f9c14d340af, cd47432398668b46). It was most likely published after your atrium Release. Update atrium, or request an artifact signed with a key this version carries.",
+        "details": {
+          "keyIds": "5ab59f9c14d340af, cd47432398668b46"
+        }
+      }
+    }
+  ]
+}
