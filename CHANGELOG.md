@@ -10,6 +10,16 @@ The Connector Artifact format moves into the SDK (#11227; atrium's ADR-0007, Ame
 - `./artifact` imports nothing from the build or the authoring layer, never calls `Bun.build` and needs no zod; `test/subpath-isolation.test.ts` holds it.
 - Golden tests: an Artifact made by atrium's publish opens here exactly as in atrium, and atrium's own reading of an Artifact written here is committed and matched (`test/golden/`).
 
+The build moves into the SDK too, with a command to run it (#11227).
+
+- **New subpath export `@3hillsit/atrium-connector-sdk/build`:** bundling each Action with the `__atriumRun` wrapper and generating the published manifest, moved from atrium's publish script (`buildConnector`, `buildActionBundle`, `readConnectorSource`), with the Bundle Contract version read off the SDK the Connector resolves (under the new name, or the old `@atrium/connector-sdk`). The same source builds the same payload as atrium's publish did, to the byte on the same Bun (`test/build/golden-build.test.ts`). It imports `./artifact`; `./artifact` still imports nothing from it.
+- **New command `atrium-connector`** (`bunx atrium-connector <command>`; needs Bun):
+  - `check` builds the Connector and self-checks it, writing and signing nothing: the source manifest and its `connection` block, the version, the entry module's exports against manifest.json (every declared Action exported, the same descriptions, the zod input schema's properties and required list), the `write` flag, then the format half of the self-check on the unsigned Artifact (the listing, the manifest validator, the file name, and each bundle spliced as atrium loads it and imported, for a callable `__atriumRun`). Each failure names its rule and its page in the developer guide; any failure exits 1.
+  - `build` does the same, then writes `dist/<id>-<version>.atrium.tar.gz` unsigned and records `{ version, payloadSha256, builtAt }` in `atrium-builds.json`, which the repo commits. A version built again with other bytes gives a warning naming both digests, and still builds.
+  - `build --try` builds `X.Y.Z-try.N+1` from a manifest saying `X.Y.Z`, N being the highest try of `X.Y.Z` in `atrium-builds.json`; manifest.json is never edited.
+  - Both print which atrium Releases accept the Bundle Contract version built (v1: every atrium Release).
+- **The `write` rule:** an Action whose `httpMethods` (in manifest.json, or else in the code) include anything but GET, HEAD or OPTIONS must say `"write": true`, or `"write": false` when it only reads (a search sent as POST). `check` and `build` fail it otherwise. The published manifest still carries only `"write": true`.
+
 ## 1.0.0-beta.1
 
 0.4.0's code, published for the first time on public npm (#11227).

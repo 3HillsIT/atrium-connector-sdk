@@ -117,3 +117,27 @@ describe('the /artifact subpath is pure', () => {
     expect(typeof mod.verifySignatures).toBe('function');
   });
 });
+
+// The "/build" subpath and the `atrium-connector` command are the build's
+// side: they may use `./artifact` (the tests above hold that nothing goes the
+// other way).
+
+describe('the /build subpath and the command', () => {
+  const pkg = JSON.parse(readFileSync(join(import.meta.dir, '..', 'package.json'), 'utf-8')) as {
+    exports: Record<string, { default: string }>;
+    bin: Record<string, string>;
+    files: string[];
+  };
+
+  test('are exported and shipped', () => {
+    expect(pkg.exports['./build']?.default).toBe('./src/build/index.ts');
+    expect(pkg.bin['atrium-connector']).toBe('bin/atrium-connector.ts');
+    expect(pkg.files).toContain('bin');
+  });
+
+  test('src/build/index.ts imports cleanly', async () => {
+    const mod = await import('../src/build');
+    expect(typeof mod.buildConnector).toBe('function');
+    expect(typeof mod.checkConnector).toBe('function');
+  });
+});
