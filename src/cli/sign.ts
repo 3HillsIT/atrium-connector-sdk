@@ -16,9 +16,10 @@ import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'fs'
 import { basename, dirname, join, resolve } from 'path';
 import { ConnectorArtifactError, addSignature } from '../artifact';
 import type { AddedSignature } from '../artifact';
+import type { RuleName } from '../build';
 import { KeyFileRefusal, readKeyFile } from './key-file';
 import type { LoadedKey } from './key-file';
-import { parseCommandArgs, plural, requiredOption } from './io';
+import { guideLine, parseCommandArgs, plural, requiredOption } from './io';
 import type { CliIO, Command } from './io';
 
 export const sign: Command = {
@@ -38,22 +39,21 @@ export const sign: Command = {
     try {
       key = await readKeyFile(keyPath);
     } catch (err) {
-      if (err instanceof KeyFileRefusal) return refused(err.message, io);
+      if (err instanceof KeyFileRefusal) return refused('key-file', err.message, io);
       throw err;
     }
 
-    if (!existsSync(artifactPath)) return refused(`There is no Artifact at ${artifactPath}.`, io);
+    if (!existsSync(artifactPath)) {
+      return refused('signable-artifact', `There is no Artifact at ${artifactPath}.`, io);
+    }
     let added: AddedSignature;
     try {
       added = await addSignature(new Uint8Array(readFileSync(artifactPath)), key);
     } catch (err) {
       if (!(err instanceof ConnectorArtifactError)) throw err;
-      return refused(
-        err.code === 'signature-invalid'
-          ? `${err.message} Check the key file at ${keyPath}.`
-          : `The Artifact at ${artifactPath} can't be signed: ${err.message}`,
-        io,
-      );
+      return err.code === 'signature-invalid'
+        ? refused('key-file', `${err.message} Check the key file at ${keyPath}.`, io)
+        : refused('signable-artifact', `The Artifact at ${artifactPath} can't be signed: ${err.message}`, io);
     }
 
     replaceFile(artifactPath, added.bytes);
@@ -80,7 +80,7 @@ function replaceFile(path: string, bytes: Uint8Array): void {
   }
 }
 
-function refused(message: string, io: CliIO): number {
-  io.err(`sign failed: ${message} Nothing was written.`);
+function refused(rule: RuleName, message: string, io: CliIO): number {
+  io.err(`sign failed: ${message} Nothing was written.\n${guideLine(rule)}`);
   return 1;
 }

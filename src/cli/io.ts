@@ -3,7 +3,7 @@
 import { parseArgs } from 'node:util';
 import type { ParseArgsConfig } from 'node:util';
 import { guidePagePath, RULES } from '../build';
-import type { CheckFailure } from '../build';
+import type { CheckFailure, RuleName } from '../build';
 
 export interface CliIO {
   /** The folder the command runs in: the Connector repo. */
@@ -86,10 +86,15 @@ export function requiredOption(
   return undefined;
 }
 
+/** The line under a refusal naming the guide page that explains its rule. */
+export function guideLine(rule: RuleName): string {
+  return `  Guide: ${guidePagePath(RULES[rule].page)}`;
+}
+
 /** Each failure with its rule's name and its guide page. */
 export function printFailures(failures: CheckFailure[], io: CliIO): void {
   for (const failure of failures) {
-    io.err(`${failure.rule}: ${failure.message}\n  Guide: ${guidePagePath(RULES[failure.rule].page)}`);
+    io.err(`${failure.rule}: ${failure.message}\n${guideLine(failure.rule)}`);
   }
 }
 

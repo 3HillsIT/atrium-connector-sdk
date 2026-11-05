@@ -1,11 +1,11 @@
-// The rules `check` and `build` hold a Connector to, each with the page of the
-// developer guide that explains it.
+// The rules the `atrium-connector` commands hold a Connector, a key file and
+// an Artifact to, each with the page of the developer guide that explains it.
 //
 // A failure always names its rule, and the rule names its page, so a developer
 // (or their coding agent) reads the page that fixes it rather than guessing.
 // The pages ship in the package under docs/, so the one named matches the SDK
-// that is installed; a test in the guide's own ticket checks every page named
-// here exists.
+// that is installed; test/docs.test.ts checks every page named here exists
+// and mentions the rule.
 
 /** The developer guide's pages, as file names under the package's docs/ without `.md`. */
 export const GUIDE_PAGES = [
@@ -22,7 +22,7 @@ export const GUIDE_PAGES = [
 
 export type GuidePage = (typeof GUIDE_PAGES)[number];
 
-/** Every rule a check can fail, and the guide page that explains it. */
+/** Every rule a command can fail, and the guide page that explains it. */
 export const RULES = {
   /** The folder holds a package.json and a manifest.json. */
   'connector-package': { page: 'build-and-sign' },
@@ -52,6 +52,12 @@ export const RULES = {
   format: { page: 'troubleshooting' },
   /** atrium-builds.json is a build record this SDK can read. */
   'build-record': { page: 'build-and-sign' },
+  /** `sign`: the key file is a P-256 key whose key id and private half are its public half's. */
+  'key-file': { page: 'build-and-sign' },
+  /** `sign`: the Artifact is there and is one that can be signed. */
+  'signable-artifact': { page: 'troubleshooting' },
+  /** `keygen`: the key's name is one the Console takes, and the key file is a new file. */
+  'new-key': { page: 'build-and-sign' },
 } as const satisfies Record<string, { page: GuidePage }>;
 
 export type RuleName = keyof typeof RULES;

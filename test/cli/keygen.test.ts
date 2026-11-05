@@ -103,7 +103,10 @@ describe('keygen', () => {
 
     expect(run.exitCode).toBe(1);
     expect(run.stdout).toBe('');
-    expect(run.stderr).toBe(`keygen failed: ${out} already exists. keygen never overwrites a key file. Nothing was written.\n`);
+    expect(run.stderr).toBe(
+      `keygen failed: ${out} already exists. keygen never overwrites a key file. Nothing was written.\n` +
+        '  Guide: node_modules/@3hillsit/atrium-connector-sdk/docs/build-and-sign.md\n',
+    );
     expect(readFileSync(out, 'utf8')).toBe('kept');
   });
 

@@ -8,7 +8,7 @@
 import { chmodSync, existsSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { keyFileText, keygenPrintout, makeKeyFile } from './key-file';
-import { parseCommandArgs, requiredOption } from './io';
+import { guideLine, parseCommandArgs, requiredOption } from './io';
 import type { CliIO, Command } from './io';
 
 /** The longest name a key may have: the Console's limit, so the name can be the one registered. */
@@ -69,6 +69,6 @@ export function keyNameProblem(name: string): string | null {
 }
 
 function refused(message: string, io: CliIO): number {
-  io.err(`keygen failed: ${message} Nothing was written.`);
+  io.err(`keygen failed: ${message} Nothing was written.\n${guideLine('new-key')}`);
   return 1;
 }

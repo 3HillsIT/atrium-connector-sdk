@@ -190,7 +190,8 @@ describe('sign', () => {
 
       expect(await refusal(path)).toBe(
         `sign failed: The key file at ${path} claims key id ${other.keyId}, but its public half derives ` +
-          `${key.keyId}. Nothing was written.\n`,
+          `${key.keyId}. Nothing was written.\n` +
+          '  Guide: node_modules/@3hillsit/atrium-connector-sdk/docs/build-and-sign.md\n',
       );
     });
 
@@ -230,7 +231,8 @@ describe('sign', () => {
 
       expect(await refusal(path)).toBe(
         `sign failed: The signature made with key ${key.keyId} does not verify with that key's public half: ` +
-          `the private half belongs to another key. Check the key file at ${path}. Nothing was written.\n`,
+          `the private half belongs to another key. Check the key file at ${path}. Nothing was written.\n` +
+          '  Guide: node_modules/@3hillsit/atrium-connector-sdk/docs/build-and-sign.md\n',
       );
     });
 
@@ -261,6 +263,7 @@ describe('sign', () => {
       const stderr = await refusal(consoleKeyFile(key));
 
       expect(stderr).toContain(`sign failed: The Artifact at ${artifactPath} can't be signed: The artifact does not match its signature`);
+      expect(stderr).toEndWith('  Guide: node_modules/@3hillsit/atrium-connector-sdk/docs/troubleshooting.md\n');
     });
 
     test('a file that is not an Artifact, or none at all', async () => {
@@ -270,7 +273,9 @@ describe('sign', () => {
 
       expect(await refusal(consoleKeyFile(key))).toContain(`The Artifact at ${artifactPath} can't be signed: `);
       const missing = join(dir, 'missing.atrium.tar.gz');
-      expect(await refusal(consoleKeyFile(key), missing)).toContain(`There is no Artifact at ${missing}.`);
+      const none = await refusal(consoleKeyFile(key), missing);
+      expect(none).toContain(`There is no Artifact at ${missing}.`);
+      expect(none).toContain('docs/troubleshooting.md');
     });
   });
 
