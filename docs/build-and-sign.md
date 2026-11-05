@@ -45,6 +45,8 @@ Sign-in kind (a name or 1-3): 1
 Wrote the Connector acme-tasks ("Acme Tasks") to /home/dev/acme-tasks.
 ```
 
+Until 1.0.0 the SDK is published on the `next` dist-tag only, so `init` needs `@next` or an exact version: `bunx -p @3hillsit/atrium-connector-sdk@next atrium-connector init acme-tasks`. The repo it writes pins the exact version that ran it, so nothing after `init` needs the tag.
+
 `init` writes a Connector repo that passes its own tests and `check` before you change a line: `manifest.json` with your answers and an example `connection` block for the sign-in kind, one read and one write Action with their tests, the parity tests, `AGENTS.md` and `CLAUDE.md` for a coding agent, and an empty `atrium-builds.json`. Its `package.json` pins the SDK version that ran `init`. What each file is for is on [concepts.md](concepts.md#what-a-connector-repo-holds).
 
 - **Each answer is also an option:** `--id <id>`, `--display-name <name>`, `--sign-in pat|multi-header|oauth2`. It asks only for what the options leave out, and without a terminal (a script, CI) it asks nothing: an answer left out is a usage error.
