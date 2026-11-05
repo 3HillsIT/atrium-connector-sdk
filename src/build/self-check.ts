@@ -14,15 +14,8 @@ import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { pathToFileURL } from 'url';
-import {
-  SIGNATURE_ALG,
-  checkArtifactFileName,
-  generateSigningKey,
-  importPrivateKey,
-  openArtifact,
-  writeEnvelope,
-} from '../artifact';
-import type { RingKey, VerifiedArtifact, WrittenEnvelope } from '../artifact';
+import { checkArtifactFileName, createFixtureKey, openArtifact, writeEnvelope } from '../artifact';
+import type { VerifiedArtifact, WrittenEnvelope } from '../artifact';
 import type { BuiltConnector } from './build';
 import type { CheckFailure } from './rules';
 
@@ -45,15 +38,8 @@ export async function checkFormat(
 ): Promise<FormatCheck> {
   const unsigned = await writeEnvelope({ ...built, signers: [], publishedAt: options.publishedAt });
 
-  const throwaway = await generateSigningKey();
-  const signed = await writeEnvelope({
-    ...built,
-    signers: [{ keyId: throwaway.keyId, privateKey: await importPrivateKey(throwaway.privateKey) }],
-    publishedAt: options.publishedAt,
-  });
-  const ring: RingKey[] = [
-    { keyId: throwaway.keyId, alg: SIGNATURE_ALG, publicKey: throwaway.publicKey, comment: 'one self-check' },
-  ];
+  const throwaway = await createFixtureKey('one self-check');
+  const signed = await writeEnvelope({ ...built, signers: [throwaway], publishedAt: options.publishedAt });
   if (signed.payloadSha256 !== unsigned.payloadSha256) {
     return {
       unsigned,
@@ -70,7 +56,7 @@ export async function checkFormat(
 
   let opened: VerifiedArtifact;
   try {
-    opened = await openArtifact(signed.bytes, ring);
+    opened = await openArtifact(signed.bytes, [throwaway.ringKey]);
     checkArtifactFileName(unsigned.fileName, opened.manifest);
   } catch (err) {
     return {
