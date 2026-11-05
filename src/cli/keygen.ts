@@ -8,8 +8,8 @@
 import { chmodSync, existsSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { keyFileText, keygenPrintout, makeKeyFile } from './key-file';
-import { guideLine, parseCommandArgs, requiredOption } from './io';
-import type { CliIO, Command } from './io';
+import { parseCommandArgs, refused, requiredOption } from './io';
+import type { Command } from './io';
 
 /** The longest name a key may have: the Console's limit, so the name can be the one registered. */
 export const KEY_NAME_MAX = 80;
@@ -33,13 +33,13 @@ export const keygen: Command = {
 
     const name = nameOption.trim();
     const problem = keyNameProblem(name);
-    if (problem) return refused(problem, io);
+    if (problem) return refused('keygen', 'new-key', problem, io);
     const outPath = resolve(io.cwd, outOption);
     if (existsSync(outPath)) {
-      return refused(`${outPath} already exists. keygen never overwrites a key file.`, io);
+      return refused('keygen', 'new-key', `${outPath} already exists. keygen never overwrites a key file.`, io);
     }
     if (!existsSync(dirname(outPath))) {
-      return refused(`There is no folder ${dirname(outPath)} to write the key file in.`, io);
+      return refused('keygen', 'new-key', `There is no folder ${dirname(outPath)} to write the key file in.`, io);
     }
 
     const file = await makeKeyFile(name);
@@ -66,9 +66,4 @@ export function keyNameProblem(name: string): string | null {
   // A key's name is a line of the Customer Key List: no line breaks or control characters.
   if (/\p{Cc}/u.test(name)) return "A key's name has letters, digits, spaces and punctuation only.";
   return null;
-}
-
-function refused(message: string, io: CliIO): number {
-  io.err(`keygen failed: ${message} Nothing was written.\n${guideLine('new-key')}`);
-  return 1;
 }

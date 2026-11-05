@@ -18,7 +18,7 @@ import { BUILD_RECORD_FILE, guidePagePath } from '../build';
 import type { RuleName } from '../build';
 import { CONNECTOR_ID_PATTERN } from '../artifact';
 import { RESERVED_CONNECTOR_IDS } from '../build/source';
-import { guideLine, parseCommandArgs } from './io';
+import { guideLine, parseCommandArgs, refused } from './io';
 import type { CliIO, Command } from './io';
 
 const SDK_ROOT = resolve(import.meta.dir, '..', '..');
@@ -129,7 +129,7 @@ export const init: Command = {
 
     // The folder first, so nobody answers questions for a repo that can't be written.
     const folderProblem = notEmptyProblem(target);
-    if (folderProblem) return refused('new-repo', folderProblem, io);
+    if (folderProblem) return refused('init', 'new-repo', folderProblem, io);
 
     const unanswered = QUESTIONS.filter((question) => typeof parsed.values[question.option] !== 'string');
     if (unanswered.length > 0 && !io.ask) {
@@ -145,7 +145,7 @@ export const init: Command = {
       const option = parsed.values[question.option];
       if (typeof option === 'string') {
         const read = question.read(option);
-        if ('problem' in read) return refused(read.rule, read.problem, io);
+        if ('problem' in read) return refused('init', read.rule, read.problem, io);
         answers[question.option] = read.value;
         continue;
       }
@@ -267,9 +267,4 @@ function nextSteps(target: string, manifest: TemplateManifest, io: CliIO): strin
     '',
     `AGENTS.md gives a coding agent the commands and the rules. The guide: ${guidePagePath('concepts')}, and the pages beside it.`,
   ].join('\n');
-}
-
-function refused(rule: RuleName, message: string, io: CliIO): number {
-  io.err(`init failed: ${message} Nothing was written.\n${guideLine(rule)}`);
-  return 1;
 }
