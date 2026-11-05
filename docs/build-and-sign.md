@@ -97,7 +97,7 @@ The payload is deterministic: the same source, lockfile and Bun give the same pa
 
 ### The build record
 
-`atrium-builds.json` holds one entry per version built: the version, its payload digest and when it was built.
+`atrium-builds.json` holds one entry per version built: the version, its payload digest and when it was built, from the first build of that version.
 
 ```json
 {
@@ -110,7 +110,7 @@ The payload is deterministic: the same source, lockfile and Bun give the same pa
 
 **Commit it.** It is how `build --try` counts, and how `build` notices a version built twice with different bytes, for everyone who builds the Connector: you, your colleagues and CI. A missing file reads as empty. Rebuilding an unchanged version leaves the file as it was.
 
-When `build` makes a version the record already has with a different payload, it warns, naming both digests, and builds anyway:
+When `build` makes a version the record already has with a different payload, it warns, naming both digests, and builds anyway. The record keeps the first digest, so every later build that differs from it warns again:
 
 ```
 Warning: atrium-builds.json has jira-dc 1.0.0 built on 2026-11-05T22:20:51.075Z with payload 025dbf4c…; this build's payload is 786210c1…. An Instance that already has 1.0.0 refuses these bytes under the same version: use build --try, or bump the version, for one that does.
