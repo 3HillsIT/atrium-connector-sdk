@@ -29,7 +29,7 @@ Each is explained on the guide's `rules.md`, under the name in brackets where `c
 - **No credentials, no environment, no files**: nothing about the system comes from anywhere but `ctx` and the Integration. If the system signs in a way none of the `connection` kinds describes, stop and tell the person: atrium can't sign in to it yet.
 - **Check the status** of every `ctx.request` and throw an `Error` that says what failed.
 - **Nothing at module top level** that needs the network, the environment or `ctx` (`loads-cleanly`).
-- **A change that ships is a new version**: raise `version` in `package.json` and `manifest.json` together (`versions.md`).
+- **A change that ships is a new version**: raise `version` in `package.json` and `manifest.json` together (`versions`).
 
 ## Read before you work
 
