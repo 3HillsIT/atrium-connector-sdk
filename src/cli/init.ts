@@ -14,10 +14,9 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, relative, resolve } from 'path';
-import { BUILD_RECORD_FILE, guidePagePath } from '../build';
+import { BUILD_RECORD_FILE, RESERVED_CONNECTOR_IDS, guidePagePath } from '../build';
 import type { RuleName } from '../build';
 import { CONNECTOR_ID_PATTERN } from '../artifact';
-import { RESERVED_CONNECTOR_IDS } from '../build/source';
 import { guideLine, parseCommandArgs, refused } from './io';
 import type { CliIO, Command } from './io';
 

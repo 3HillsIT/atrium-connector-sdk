@@ -61,6 +61,7 @@ export {
   deriveKeyId,
   generateSigningKey,
   importPrivateKey,
+  importPublicKey,
   serializeBlob,
   parseBlob,
   serializeSignatureFile,

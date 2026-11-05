@@ -49,6 +49,7 @@ Signing moves out of atrium too: a customer's developer signs with their own Cus
 - **Key files** are the JSON `{keyId, privateKey, publicKey}` (base64 PKCS#8 and SPKI) that atrium's `keygen:signing` writes and the Console's Customer Key download writes with `name` and `account` added; other fields are ignored. `sign` refuses a file whose key id isn't derived from its public half (atrium's derivation: the first 8 bytes of SHA-256 over the SPKI, hex), or whose halves aren't P-256. Its messages name the file and never quote it.
 - **`atrium-connector keygen --name <name> --out <file>`** writes a new P-256 key file `{keyId, privateKey, publicKey, name}`, mode 600, never over an existing file. Standard output is exactly the two lines the Console's Register takes, `key-id <id>` and `public-key <base64 SPKI>`, so `keygen … > key.pub` is the paste; the private half is never printed. The name follows the Console's rule (at most 80 characters, no control characters).
 - **`addSignature(bytes, signer)`** in `./artifact` is `sign`'s core: it adds or replaces one signature and opens the result with the signer's public half. `parseSignatureFile(bytes, { allowUnsigned: true })` reads a `payload.sig` with no signature line; without the option it is still refused as `signature-missing`.
+- **`importPublicKey(spki)`** in `./artifact` imports a P-256 public half as a verifying key, as the verifier does for a ring key; `sign` checks a key file's public half with it.
 - `build`'s last line names the `sign` command to run next.
 
 ## 1.0.0-beta.1
