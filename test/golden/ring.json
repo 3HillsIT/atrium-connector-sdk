@@ -1,0 +1,34 @@
+{
+  "keys": {
+    "golden-a": {
+      "keyId": "3874fb21fbd27e95",
+      "alg": "ecdsa-p256-sha256",
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3c5CE0SxhFm+uw5E5yGcTQbp0crzGx2C2LZRC9nPpcxdNxYsrs5nDgHgau18OAx7l+9vJTIuZPDJ2zhYlylRiA==",
+      "comment": "golden-a — golden fixture key, private half discarded"
+    },
+    "golden-b": {
+      "keyId": "3f2d4b3485508d3f",
+      "alg": "ecdsa-p256-sha256",
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE2mJ9JAMgRV++uhgeBwMDvnZL3e8qtNfK5wSk2xDrzACSXfsb4qnFrOnvvlziGM1hLvvDHE1ALTJX25H+ecG8aQ==",
+      "comment": "golden-b — golden fixture key, private half discarded"
+    },
+    "golden-release": {
+      "keyId": "b37ea49b9eaab8d8",
+      "alg": "ecdsa-p256-sha256",
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJv4YnKY3dUQVljyrTNwMwxXbchjG9reubxsc5viml4jzTIjZC5g1oc1w+jj4akzZnsxYHhik54lNi9hxbi7pCg==",
+      "comment": "golden-release — golden fixture key, private half discarded"
+    },
+    "golden-c": {
+      "keyId": "5ab59f9c14d340af",
+      "alg": "ecdsa-p256-sha256",
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE8GYyi3o93JkxVK8A6D7TAbfVzi8Vg8B4O6gnTCQG3+NAGDNtPMijEQuNgEuzVBnMdGfihZ2QOR3E3mj9xk6Tvw==",
+      "comment": "golden-c — golden fixture key, private half discarded"
+    },
+    "golden-d": {
+      "keyId": "cd47432398668b46",
+      "alg": "ecdsa-p256-sha256",
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAERrU4sDHILBV9zzxJ+0PqgEPAK5J8Ro94iPhxEPV5TSJ794kRQCg1yFlg5dCv1sHtFhHtjRoTHk3tlQVIYOwl/A==",
+      "comment": "golden-d — golden fixture key, private half discarded"
+    }
+  }
+}

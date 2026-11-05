@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+The Connector Artifact format moves into the SDK (#11227; atrium's ADR-0007, Amendment from #11226).
+
+- **New subpath export `@3hillsit/atrium-connector-sdk/artifact`:** the format itself, moved from atrium's `backend/src/connector-artifact` with its tests. It reads, verifies and writes Connector Artifacts exactly as atrium does: the envelope reader and writer (`openArtifact`, `readEnvelope`, `writeEnvelope`), signing and verifying, the `ATRIUM-SIGNED.json` listing, the published manifest's types and validator (the `connection` block's `pat`, `multi-header` and `oauth2` sign-in kinds included), the `__atriumRun` wrapper text (`actionWrapperSource`), the refusal codes, and fixture builders for tests. The hardened reader's rules are unchanged.
+- **The verifier reports every key whose signature verified:** `openArtifact` returns `keyIds: string[]`, in `payload.sig`'s order, where atrium's returned the first `keyId`. It holds no ring and decides nothing about trust; which keys to trust stays atrium's. It no longer names atrium's testing key: an Artifact only keys outside the ring signed is `unknown-key`, with every key id in `details.keyIds`. It runs the collect-all loop of atrium's `signed-file` (the License's verifier), so a signature line that is not canonical base64 now validates nothing, where Buffer's decoder dropped the stray characters.
+- **`writeEnvelope` with no signer** writes an unsigned Artifact: `payload.sig` carries the signed blob and no signature line, and opening it is refused as `signature-missing` until it is signed. `writeEnvelopeParts` rebuilds the outer layer from its two parts.
+- `./artifact` imports nothing from the build or the authoring layer, never calls `Bun.build` and needs no zod; `test/subpath-isolation.test.ts` holds it.
+- Golden tests: an Artifact made by atrium's publish opens here exactly as in atrium, and atrium's own reading of an Artifact written here is committed and matched (`test/golden/`).
+
 ## 1.0.0-beta.1
 
 0.4.0's code, published for the first time on public npm (#11227).

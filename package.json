@@ -27,6 +27,10 @@
     "./client": {
       "types": "./src/client.ts",
       "default": "./src/client.ts"
+    },
+    "./artifact": {
+      "types": "./src/artifact/index.ts",
+      "default": "./src/artifact/index.ts"
     }
   },
   "scripts": {
