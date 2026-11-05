@@ -100,11 +100,26 @@ export function guideLine(rule: RuleName): string {
   return `  Guide: ${guidePagePath(RULES[rule].page)}`;
 }
 
-/** Each failure with its rule's name and its guide page. */
-export function printFailures(failures: CheckFailure[], io: CliIO): void {
+/**
+ * A command's one refusal, on stderr: `<command> failed: <message> Nothing
+ * was written.` and the guide page of its rule. Returns the exit code, 1.
+ */
+export function refused(command: string, rule: RuleName, message: string, io: CliIO): number {
+  io.err(`${command} failed: ${message} Nothing was written.\n${guideLine(rule)}`);
+  return 1;
+}
+
+/**
+ * `check`'s and `build`'s refusal, on stderr: each failure with its rule's
+ * name and its guide page, then `<command> failed: N problem(s). Nothing was
+ * written or signed.` Returns the exit code, 1.
+ */
+export function refusedFailures(command: string, failures: CheckFailure[], io: CliIO): number {
   for (const failure of failures) {
     io.err(`${failure.rule}: ${failure.message}\n${guideLine(failure.rule)}`);
   }
+  io.err(`${command} failed: ${plural(failures.length, 'problem', 'problems')}. Nothing was written or signed.`);
+  return 1;
 }
 
 export function plural(count: number, one: string, many: string): string {

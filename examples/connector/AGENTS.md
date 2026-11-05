@@ -22,14 +22,14 @@ Never run `atrium-connector sign`, and never read, make or ask for a key file. S
 
 Each is explained on the guide's `rules.md`, under the name in brackets where `check` tests it.
 
-- **The `write` flag** (`write-flag`): an Action that creates, changes, deletes, sends or triggers anything has `"write": true` in `manifest.json`, and its name is in `WRITE_ACTIONS` in `test/parity.test.ts`. Only that flag puts its Tools behind approval. A read sent as POST says `"write": false`. Decide which Actions write with the person, by name; when unsure, it is a write.
+- **The `write` flag** (`write-flag`): an Action that creates, changes, deletes, sends or triggers anything has `"write": true` in `manifest.json`, and its name is in `WRITE_ACTIONS` in `test/parity.test.ts`. Only that flag puts its Tools behind approval. A read sent as POST says `"write": false`. Every Action declares its `httpMethods`: one with neither those nor `write` counts as a write and fails `check`. Decide which Actions write with the person, by name; when unsure, it is a write.
 - **Manifest and code agree** (`parity`): the same Actions, descriptions, input properties and required list in `manifest.json` and the zod `inputSchema`. Change both in the same commit.
 - **Exports and names** (`exports-and-names`): every Action is exported from `src/index.ts`, and its `id` equals its `name` in `manifest.json`.
 - **All HTTP through `ctx.request`**: no `fetch`, no other HTTP client.
 - **No credentials, no environment, no files**: nothing about the system comes from anywhere but `ctx` and the Integration. If the system signs in a way none of the `connection` kinds describes, stop and tell the person: atrium can't sign in to it yet.
 - **Check the status** of every `ctx.request` and throw an `Error` that says what failed.
 - **Nothing at module top level** that needs the network, the environment or `ctx` (`loads-cleanly`).
-- **A change that ships is a new version**: raise `version` in `package.json` and `manifest.json` together (`versions.md`).
+- **A change that ships is a new version**: raise `version` in `package.json` and `manifest.json` together (`versions`).
 
 ## Read before you work
 

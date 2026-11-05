@@ -168,11 +168,13 @@ function parityFailures(action: SourceManifestAction, code: ExportedAction): Che
 }
 
 /**
- * An Action that sends anything but GET (or HEAD, OPTIONS) must say whether
- * it changes something: `"write": true` puts its Tools behind atrium's write
- * approval, and without it they run with nobody's. `"write": false` is the
- * author's word that it only reads (a search sent as POST), and is never
- * second-guessed. An Action that declares no methods anywhere isn't judged.
+ * An Action must say whether it changes something, unless it declares that it
+ * sends only GET (or HEAD, OPTIONS): `"write": true` puts its Tools behind
+ * atrium's write approval, and without it they run with nobody's.
+ * `"write": false` is the author's word that it only reads (a search sent as
+ * POST), and is never second-guessed. An Action that declares no methods
+ * anywhere is unknown, not a read (`ActionDefinition.httpMethods`: treat it as
+ * write-capable, fail-safe), so it needs `write` too.
  */
 function writeFlagFailure(
   action: SourceManifestAction,
@@ -184,16 +186,22 @@ function writeFlagFailure(
       rule: 'write-flag',
       message:
         `The action "${action.name}" declares "write": ${JSON.stringify(write)}; it is true or ` +
-        'false, or left out for a read.',
+        'false, or left out for an Action whose httpMethods are only GET, HEAD or OPTIONS.',
     };
   }
   if (write !== undefined) return undefined;
 
-  const declared = Array.isArray(action.httpMethods)
-    ? action.httpMethods
-    : Array.isArray(code?.httpMethods)
-      ? (code.httpMethods as unknown[])
-      : [];
+  const declared = declaredMethods(action.httpMethods) ?? declaredMethods(code?.httpMethods);
+  if (!declared) {
+    return {
+      rule: 'write-flag',
+      message:
+        `The action "${action.name}" declares no httpMethods and no "write", so nothing says whether ` +
+        'it changes anything, and it counts as a write. Declare its httpMethods (in manifest.json or ' +
+        'the code; GET alone makes it a read), or add "write": true if it changes anything, ' +
+        '"write": false if it just reads.',
+    };
+  }
   const writes = declared.map((method) => String(method).toUpperCase()).filter((method) => !READ_METHODS.has(method));
   if (writes.length === 0) return undefined;
   return {
@@ -203,6 +211,11 @@ function writeFlagFailure(
       'say whether it changes anything. Add "write": true if it does, so its Tools wait for approval; ' +
       'add "write": false only if it just reads (a search sent as POST, say).',
   };
+}
+
+/** A non-empty httpMethods list, or undefined when there is none to judge by. */
+function declaredMethods(methods: unknown): unknown[] | undefined {
+  return Array.isArray(methods) && methods.length > 0 ? methods : undefined;
 }
 
 /** A zod object schema's shape, read by duck type so the Connector's zod copy doesn't matter. */

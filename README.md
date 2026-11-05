@@ -6,7 +6,7 @@ Build Connectors for atrium. A Connector gives AI clients Tools that read from a
 bun add --exact @3hillsit/atrium-connector-sdk
 ```
 
-It needs [Bun](https://bun.sh). It is MIT-licensed ([LICENSE](LICENSE)).
+Until 1.0.0 it is published on the `next` dist-tag only: add `@next` or an exact version (`bun add --exact @3hillsit/atrium-connector-sdk@next`). It needs [Bun](https://bun.sh). It is MIT-licensed ([LICENSE](LICENSE)).
 
 ## Quick start
 
@@ -16,6 +16,8 @@ It needs [Bun](https://bun.sh). It is MIT-licensed ([LICENSE](LICENSE)).
    bunx -p @3hillsit/atrium-connector-sdk atrium-connector init my-connector
    cd my-connector && bun install
    ```
+
+   Until 1.0.0 the package is published on the `next` dist-tag only, so the first command needs `@next` or an exact version: `bunx -p @3hillsit/atrium-connector-sdk@next atrium-connector init my-connector`. The repo it writes pins that exact version.
 
    It asks the Connector's id, its display name and how the system signs in, and writes a repo that passes its tests and `check` as it stands: a manifest, one read and one write Action with their tests, and `AGENTS.md` for a coding agent ([concepts](docs/concepts.md#what-a-connector-repo-holds)).
 1. Replace the example Actions with your system's: the manifest and its `connection` block ([manifest](docs/manifest.md)), then each Action ([actions](docs/actions.md)).
@@ -49,7 +51,7 @@ Every refusal from `init`, `check`, `build`, `sign` and `keygen` names the page 
 
 The SDK follows semantic versioning from 1.0.0:
 
-- **Breaking changes come only in a new major,** with migration steps in the [CHANGELOG](CHANGELOG.md). That covers the authoring API (what the package and its `/client` subpath export) and the `init`, `check`, `build`, `sign` and `keygen` commands.
+- **Breaking changes come only in a new major,** with migration steps in the [CHANGELOG](CHANGELOG.md). That covers the authoring API (what the package and its `/client` subpath export) and the `init`, `check`, `build`, `sign` and `keygen` commands. The `/artifact` and `/build` subpaths are for atrium's own tools and are not covered: build on the commands, not on them.
 - **Fixes land on the newest major only.**
 - **The SDK's version plays no part in what an Instance accepts.** The SDK is inlined into every Action's bundle, so a Connector built with an older SDK keeps running for as long as atrium accepts its Bundle Contract version, and you update the SDK when you choose. atrium's own promise for the Bundle Contract is on [versions](docs/versions.md).
 

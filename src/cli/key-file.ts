@@ -18,9 +18,9 @@ import {
   fromBase64Strict,
   generateSigningKey,
   importPrivateKey,
+  importPublicKey,
 } from '../artifact';
 import type { ArtifactSigner } from '../artifact';
-import type { SubtleBytes } from '../artifact/digest';
 
 /** What a key file holds. `name` and `account` are the Console's; `keygen` writes `name`. */
 export interface KeyFile {
@@ -46,8 +46,6 @@ export class KeyFileRefusal extends Error {
     this.name = 'KeyFileRefusal';
   }
 }
-
-const P256 = { name: 'ECDSA', namedCurve: 'P-256' } as const;
 
 /**
  * Reads the key file at `path` and checks it: JSON with `keyId`, `privateKey`
@@ -77,7 +75,7 @@ export async function readKeyFile(path: string): Promise<LoadedKey> {
   }
 
   const spki = fromBase64Strict(file.publicKey);
-  if (!spki || !(await isP256PublicKey(spki))) {
+  if (!spki || !(await importPublicKey(spki).then(() => true, () => false))) {
     throw refuse(
       'holds a public half that is not a P-256 public key (base64 SPKI). Connector Artifacts ' +
         `are signed ${SIGNATURE_ALG}, so only a P-256 key signs one.`,
@@ -100,15 +98,6 @@ export async function readKeyFile(path: string): Promise<LoadedKey> {
     publicKey: file.publicKey,
     ...(typeof file.name === 'string' ? { name: file.name } : {}),
   };
-}
-
-async function isP256PublicKey(spki: Uint8Array): Promise<boolean> {
-  try {
-    await crypto.subtle.importKey('spki', spki as unknown as SubtleBytes, P256, false, ['verify']);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 /** A new P-256 key, as the key file `keygen` writes. */

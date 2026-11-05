@@ -52,7 +52,7 @@ Import `z` from the SDK, so your schemas use the zod the SDK was written for.
 | `description` | The text the AI model reads. Equal to the manifest's `description`. |
 | `inputSchema` | A zod object schema. atrium checks every call's input against it before your handler runs. Its properties and required list must match the manifest's JSON Schema. |
 | `outputSchema` | Optional. `runAction` checks the handler's result against it in your tests; atrium doesn't check it when a Tool runs. |
-| `httpMethods` | The methods the handler sends. Documentation for atrium; `check` reads it for the `write-flag` rule if the manifest has none. |
+| `httpMethods` | The methods the handler sends. Documentation for atrium; `check` reads it for the `write-flag` rule if the manifest has none. With neither list nor a `write` in the manifest, `check` fails the Action. |
 | `handler` | `async (ctx, input) => result`. `input` is already parsed by `inputSchema`. The result goes back to the AI client as the Tool's answer. |
 
 `defineAction` and `defineConnector` return what you pass them and check nothing. The checks happen in `runAction` (your tests), in `check` and on the Instance.
@@ -88,7 +88,7 @@ An Action that changes anything in the system (creates, updates, deletes, sends,
 - With `"write": true`, a call to its Tool waits for approval by whoever the Tool's approval policy names, unless an admin has set the Tool or its Workspace to run writes without approval in atrium.
 - Without it, the Tool is a read and runs at once, for anyone the Workspace lets call it.
 
-`httpMethods` doesn't decide it: a search sent as `POST` is a read (`"write": false`), and a `GET` that triggers a job is a write. `check` refuses an Action that sends anything but `GET`, `HEAD` or `OPTIONS` and says neither (the `write-flag` rule on [rules.md](rules.md)). When in doubt, it is a write.
+`httpMethods` doesn't decide it: a search sent as `POST` is a read (`"write": false`), and a `GET` that triggers a job is a write. `check` refuses an Action that says neither and sends anything but `GET`, `HEAD` or `OPTIONS`, or declares no `httpMethods` at all (the `write-flag` rule on [rules.md](rules.md)). When in doubt, it is a write.
 
 ## What a handler never does
 

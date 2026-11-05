@@ -169,20 +169,37 @@ describe('the same source gives the same payload', () => {
 });
 
 describe('a version built again with other bytes', () => {
-  test('warns naming both digests, still builds, and records the new payload', async () => {
+  test('warns naming both digests, still builds, and keeps the first payload in the record', async () => {
     await build();
-    const before = record().builds[0]!;
+    const first = record().builds[0]!;
+    const recordText = repo.readFile(BUILD_RECORD_FILE);
 
     repo.writeEntry(ENTRY_SOURCE.replace("'/things'", "'/things/'"));
     const run = await build();
+    const rebuilt = await sha256Hex(readEnvelope(artifact('1.2.0')).payload);
 
-    const after = record().builds;
-    expect(after).toHaveLength(1);
-    expect(after[0]!.payloadSha256).not.toBe(before.payloadSha256);
-    expect(run.stderr).toContain(`Warning: ${BUILD_RECORD_FILE} has thing-connector 1.2.0 built on ${before.builtAt}`);
-    expect(run.stderr).toContain(before.payloadSha256);
-    expect(run.stderr).toContain(after[0]!.payloadSha256);
+    expect(rebuilt).not.toBe(first.payloadSha256);
+    expect(run.stderr).toContain(`Warning: ${BUILD_RECORD_FILE} has thing-connector 1.2.0 built on ${first.builtAt}`);
+    expect(run.stderr).toContain(first.payloadSha256);
+    expect(run.stderr).toContain(rebuilt);
     expect(run.stdout).toContain('Built thing-connector 1.2.0, unsigned');
-    expect(await sha256Hex(readEnvelope(artifact('1.2.0')).payload)).toBe(after[0]!.payloadSha256);
+    // One entry per version, the digest built first: an Instance that has
+    // 1.2.0 has those bytes, whatever was built since.
+    expect(repo.readFile(BUILD_RECORD_FILE)).toBe(recordText);
+  });
+
+  test('every rebuild that differs from the first warns: A, then B, then B again', async () => {
+    await build();
+    const first = record().builds[0]!;
+
+    repo.writeEntry(ENTRY_SOURCE.replace("'/things'", "'/things/'"));
+    const second = await build();
+    const third = await build();
+
+    for (const run of [second, third]) {
+      expect(run.stderr).toContain(`Warning: ${BUILD_RECORD_FILE} has thing-connector 1.2.0 built on ${first.builtAt}`);
+      expect(run.stderr).toContain(first.payloadSha256);
+    }
+    expect(record().builds).toEqual([first]);
   });
 });

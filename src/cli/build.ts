@@ -12,7 +12,6 @@ import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import {
   BUILD_RECORD_FILE,
-  assertPlainVersion,
   bundleContractLine,
   checkConnector,
   failureOf,
@@ -22,9 +21,9 @@ import {
   recordBuild,
   writeBuildRecord,
 } from '../build';
-import type { BuildRecord, CheckFailure, ConnectorSource } from '../build';
-import { parseCommandArgs, plural, printFailures } from './io';
-import type { CliIO, Command } from './io';
+import type { BuildRecord, ConnectorSource } from '../build';
+import { parseCommandArgs, refusedFailures } from './io';
+import type { Command } from './io';
 
 /** Where `build` writes the Artifact, relative to the Connector repo. */
 export const OUTPUT_DIRECTORY = 'dist';
@@ -38,14 +37,15 @@ export const build: Command = {
     if (!parsed) return 2;
     const tryVersion = parsed.values.try === true;
 
+    // The source once, for the version to build; checkConnector takes it as
+    // read, and refuses a version that isn't a plain X.Y.Z.
     let source: ConnectorSource;
     let record: BuildRecord;
     try {
       source = readConnectorSource(io.cwd);
-      assertPlainVersion(source.manifest);
       record = readBuildRecord(io.cwd);
     } catch (err) {
-      return refused([failureOf(err, 'manifest')], io);
+      return refusedFailures('build', [failureOf(err, 'manifest')], io);
     }
     const plainVersion = source.manifest.version;
     const version = tryVersion ? nextTryVersion(record, plainVersion) : plainVersion;
@@ -53,7 +53,7 @@ export const build: Command = {
     const builtAt = io.now().toISOString();
     const report = await checkConnector(io.cwd, { source, version, publishedAt: builtAt });
     if (report.connectorApiVersion !== undefined) io.out(bundleContractLine(report.connectorApiVersion));
-    if (report.failures.length > 0) return refused(report.failures, io);
+    if (report.failures.length > 0) return refusedFailures('build', report.failures, io);
     const unsigned = report.unsigned!;
     const { id } = report.built!.manifest;
 
@@ -85,9 +85,3 @@ export const build: Command = {
     return 0;
   },
 };
-
-function refused(failures: CheckFailure[], io: CliIO): number {
-  printFailures(failures, io);
-  io.err(`build failed: ${plural(failures.length, 'problem', 'problems')}. Nothing was written or signed.`);
-  return 1;
-}

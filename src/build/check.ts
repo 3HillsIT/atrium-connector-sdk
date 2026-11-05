@@ -72,6 +72,7 @@ export async function checkConnector(
   try {
     report.built = await buildConnector(packageDir, {
       source: report.source,
+      connectorApiVersion: report.connectorApiVersion,
       version: options.version ?? manifest.version,
     });
   } catch (err) {

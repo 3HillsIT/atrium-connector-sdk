@@ -35,6 +35,12 @@ export interface BuildConnectorOptions {
   /** Run `bun install --frozen-lockfile` in the package first. Off by default. */
   install?: boolean;
   /**
+   * The Bundle Contract version, if the caller has read it already
+   * (`readBundleContractVersion`, as `checkConnector` does). Read after the
+   * install otherwise. Not taken with `install`: the install decides it.
+   */
+  connectorApiVersion?: number;
+  /**
    * Called with the Bundle Contract version read off the Connector's SDK, after
    * the install and before anything is bundled; throw to refuse it. atrium's
    * release refuses a version other than the one it speaks.
@@ -68,7 +74,10 @@ export async function buildConnector(
   // After the install, which is what puts the SDK where it resolves, and
   // before the bundler: a Connector on the wrong SDK is refused without a
   // byte built.
-  const connectorApiVersion = await readBundleContractVersion(packageDir);
+  const connectorApiVersion =
+    options.connectorApiVersion !== undefined && !options.install
+      ? options.connectorApiVersion
+      : await readBundleContractVersion(packageDir);
   options.assertContract?.(connectorApiVersion, `${source.id}@${source.version}`);
 
   log(`Bundling ${source.actions.length} action(s)…`);
@@ -130,8 +139,8 @@ function installFrozen(packageDir: string): void {
   if (result.exitCode !== 0) {
     throw new BuildRefusal(
       'sdk-installed',
-      `\`bun install --frozen-lockfile\` failed in ${packageDir} — the lockfile is probably ` +
-        `stale, so run \`bun install\` there and commit it:\n${new TextDecoder().decode(result.stderr)}`,
+      `\`bun install --frozen-lockfile\` failed in ${packageDir}. The lockfile is probably ` +
+        `stale; run \`bun install\` there and commit it.\n${new TextDecoder().decode(result.stderr)}`,
     );
   }
 }

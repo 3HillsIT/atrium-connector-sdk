@@ -78,19 +78,17 @@ export function nextTryVersion(record: BuildRecord, version: string): string {
 
 /**
  * The record with `entry` in it, and the entry it had for that version
- * before. One entry per version: the same payload again leaves the record as
- * it was (so an unchanged rebuild changes no committed file), and another
- * payload replaces the entry in place.
+ * before. One entry per version, the one built first: a version already in
+ * the record leaves the record as it was, whatever its payload. An unchanged
+ * rebuild changes no committed file, and every rebuild with other bytes is
+ * compared with the first bytes (what an Instance that has the version holds),
+ * so each of them warns, not only the first.
  */
 export function recordBuild(
   record: BuildRecord,
   entry: BuildRecordEntry,
 ): { record: BuildRecord; previous?: BuildRecordEntry } {
-  const index = record.builds.findIndex((built) => built.version === entry.version);
-  if (index === -1) return { record: { builds: [...record.builds, entry] } };
-  const previous = record.builds[index]!;
-  if (previous.payloadSha256 === entry.payloadSha256) return { record, previous };
-  const builds = [...record.builds];
-  builds[index] = entry;
-  return { record: { builds }, previous };
+  const previous = record.builds.find((built) => built.version === entry.version);
+  if (previous) return { record, previous };
+  return { record: { builds: [...record.builds, entry] } };
 }

@@ -69,6 +69,29 @@ describe('check fails, naming the rule and its guide page', () => {
 
     expect(run.exitCode).toBe(1);
     expect(rulesIn(run.stderr)).toEqual(['write-flag']);
+    expect(run.stderr).toContain('The action "create_thing" sends POST');
+  });
+
+  test('an Action declaring no httpMethods anywhere and no "write": unknown counts as a write', async () => {
+    repo.editManifest((manifest) => {
+      delete manifest.actions[0].httpMethods;
+    });
+    repo.writeEntry(ENTRY_SOURCE.replace("  httpMethods: ['GET'],\n", ''));
+
+    const run = await runCommand(repo.dir, 'check');
+
+    expect(run.exitCode).toBe(1);
+    expect(rulesIn(run.stderr)).toEqual(['write-flag']);
+    expect(run.stderr).toContain('The action "list_things" declares no httpMethods and no "write"');
+    expect(run.stderr).toContain('Declare its httpMethods');
+
+    // "write": false is the author's word that it only reads, as for a POST.
+    repo.editManifest((manifest) => {
+      manifest.actions[0].write = false;
+    });
+    const declared = await runCommand(repo.dir, 'check');
+    expect(declared.stderr).toBe('');
+    expect(declared.exitCode).toBe(0);
   });
 
   test('a parity break: another description in the manifest than in the code', async () => {

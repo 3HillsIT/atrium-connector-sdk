@@ -14,11 +14,11 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, relative, resolve } from 'path';
-import { BUILD_RECORD_FILE, guidePagePath } from '../build';
+import { BUILD_RECORD_FILE, RESERVED_CONNECTOR_IDS, guidePagePath } from '../build';
 import type { RuleName } from '../build';
-import { CONNECTOR_ID_PATTERN } from '../artifact';
-import { RESERVED_CONNECTOR_IDS } from '../build/source';
-import { guideLine, parseCommandArgs } from './io';
+import { CONNECTION_AUTH_TYPES, CONNECTOR_ID_PATTERN } from '../artifact';
+import type { ConnectionAuthType } from '../artifact';
+import { guideLine, parseCommandArgs, refused } from './io';
 import type { CliIO, Command } from './io';
 
 const SDK_ROOT = resolve(import.meta.dir, '..', '..');
@@ -27,14 +27,17 @@ export const TEMPLATE_DIRECTORY = join(SDK_ROOT, 'examples', 'connector');
 /** One `{ _comment, connection }` file per sign-in kind. */
 export const CONNECTIONS_DIRECTORY = join(SDK_ROOT, 'examples', 'connections');
 
-/** The sign-in kinds a `connection` block can name, as `init` offers them. */
-export const SIGN_IN_KINDS = {
+/** What each sign-in kind a `connection` block can name means, as `init` offers them. */
+export const SIGN_IN_KINDS: Record<ConnectionAuthType, string> = {
   pat: 'a token or API key, sent in one header',
   'multi-header': 'a secret in one header, and settings from the Integration in others',
   oauth2: 'Microsoft Entra ID, through the Instance\'s own Microsoft registration',
-} as const;
+};
 
-export type SignInKind = keyof typeof SIGN_IN_KINDS;
+export type SignInKind = ConnectionAuthType;
+
+/** `pat, multi-header or oauth2`. */
+const SIGN_IN_NAMES = `${CONNECTION_AUTH_TYPES.slice(0, -1).join(', ')} or ${CONNECTION_AUTH_TYPES.at(-1)}`;
 
 /**
  * Template files written under another name. npm leaves every `.gitignore`
@@ -57,9 +60,9 @@ interface Question {
   read: (answer: string) => { value: string } | { rule: RuleName; problem: string };
 }
 
-const SIGN_IN_LIST = Object.entries(SIGN_IN_KINDS)
-  .map(([kind, what], index) => `  ${index + 1}. ${kind.padEnd(12)} ${what}`)
-  .join('\n');
+const SIGN_IN_LIST = CONNECTION_AUTH_TYPES.map(
+  (kind, index) => `  ${index + 1}. ${kind.padEnd(12)} ${SIGN_IN_KINDS[kind]}`,
+).join('\n');
 
 const QUESTIONS: Question[] = [
   {
@@ -96,16 +99,16 @@ const QUESTIONS: Question[] = [
   },
   {
     option: 'sign-in',
-    prompt: `How does the system take its credential?\n${SIGN_IN_LIST}\nSign-in kind (a name or 1-3):`,
+    prompt: `How does the system take its credential?\n${SIGN_IN_LIST}\nSign-in kind (a name or 1-${CONNECTION_AUTH_TYPES.length}):`,
     read(answer) {
       const given = answer.trim().toLowerCase();
-      const kinds = Object.keys(SIGN_IN_KINDS) as SignInKind[];
+      const kinds: readonly SignInKind[] = CONNECTION_AUTH_TYPES;
       const kind = /^[1-9]$/.test(given) ? kinds[Number(given) - 1] : kinds.find((k) => k === given);
       if (kind) return { value: kind };
       return {
         rule: 'connection',
         problem:
-          `"${answer.trim()}" isn't a sign-in kind: pat, multi-header or oauth2. If the system signs in ` +
+          `"${answer.trim()}" isn't a sign-in kind: ${SIGN_IN_NAMES}. If the system signs in ` +
           "another way, atrium can't sign in to it yet.",
       };
     },
@@ -113,7 +116,7 @@ const QUESTIONS: Question[] = [
 ];
 
 export const init: Command = {
-  usage: 'init [dir] [--id <id>] [--display-name <name>] [--sign-in pat|multi-header|oauth2]',
+  usage: `init [dir] [--id <id>] [--display-name <name>] [--sign-in ${CONNECTION_AUTH_TYPES.join('|')}]`,
   summary:
     'Writes a new Connector repo into an empty folder that passes its tests and check. Asks for what the options leave out.',
   async run(args, io) {
@@ -129,7 +132,7 @@ export const init: Command = {
 
     // The folder first, so nobody answers questions for a repo that can't be written.
     const folderProblem = notEmptyProblem(target);
-    if (folderProblem) return refused('new-repo', folderProblem, io);
+    if (folderProblem) return refused('init', 'new-repo', folderProblem, io);
 
     const unanswered = QUESTIONS.filter((question) => typeof parsed.values[question.option] !== 'string');
     if (unanswered.length > 0 && !io.ask) {
@@ -145,7 +148,7 @@ export const init: Command = {
       const option = parsed.values[question.option];
       if (typeof option === 'string') {
         const read = question.read(option);
-        if ('problem' in read) return refused(read.rule, read.problem, io);
+        if ('problem' in read) return refused('init', read.rule, read.problem, io);
         answers[question.option] = read.value;
         continue;
       }
@@ -267,9 +270,4 @@ function nextSteps(target: string, manifest: TemplateManifest, io: CliIO): strin
     '',
     `AGENTS.md gives a coding agent the commands and the rules. The guide: ${guidePagePath('concepts')}, and the pages beside it.`,
   ].join('\n');
-}
-
-function refused(rule: RuleName, message: string, io: CliIO): number {
-  io.err(`init failed: ${message} Nothing was written.\n${guideLine(rule)}`);
-  return 1;
 }

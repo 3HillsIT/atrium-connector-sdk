@@ -83,14 +83,13 @@ export async function importPrivateKey(privateKeyBase64: string): Promise<Crypto
   );
 }
 
+/** A P-256 public half (SPKI) as a verifying key; throws when the bytes aren't one. */
+export async function importPublicKey(publicKeySpki: Uint8Array): Promise<CryptoKey> {
+  return crypto.subtle.importKey('spki', publicKeySpki as unknown as SubtleBytes, P256, false, ['verify']);
+}
+
 async function importRingKey(key: RingKey): Promise<CryptoKey> {
-  return crypto.subtle.importKey(
-    'spki',
-    fromBase64(key.publicKey) as unknown as SubtleBytes,
-    P256,
-    false,
-    ['verify'],
-  );
+  return importPublicKey(fromBase64(key.publicKey));
 }
 
 // --- the signed blob -----------------------------------------------------

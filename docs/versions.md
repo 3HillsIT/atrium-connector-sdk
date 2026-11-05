@@ -68,7 +68,7 @@ From 1.0.0, the SDK follows semantic versioning:
 - **Fixes land on the newest major only.** Staying on an older major is safe for what you have built (below), but it gets no more fixes.
 - **The SDK's version plays no part in what an Instance accepts.** Only the Bundle Contract version does. The SDK is inlined into every bundle, so a Connector built with an old SDK major keeps running for as long as atrium accepts its Bundle Contract version. You update the SDK when you choose to.
 
-The `/artifact` and `/build` exports are the Artifact format and the build the commands run, for atrium's own tools. Build on the commands, not on them.
+The `/artifact` and `/build` exports are the Artifact format and the build the commands run, for atrium's own tools, and this promise doesn't cover them. Build on the commands, not on them.
 
 Versions before 1.0.0, the `1.0.0-beta.N` pre-releases included, make no promise.
 

@@ -21,6 +21,7 @@ export {
   ACTION_NAME_PATTERN,
   ACTION_GROUP_MAX_LENGTH,
   PLAIN_VERSION_PATTERN,
+  RESERVED_CONNECTOR_IDS,
 } from './source';
 export type { ConnectorSource, SourceManifest, SourceManifestAction } from './source';
 
