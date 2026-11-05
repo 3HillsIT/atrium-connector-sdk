@@ -12,7 +12,6 @@ import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import {
   BUILD_RECORD_FILE,
-  assertPlainVersion,
   bundleContractLine,
   checkConnector,
   failureOf,
@@ -38,11 +37,12 @@ export const build: Command = {
     if (!parsed) return 2;
     const tryVersion = parsed.values.try === true;
 
+    // The source once, for the version to build; checkConnector takes it as
+    // read, and refuses a version that isn't a plain X.Y.Z.
     let source: ConnectorSource;
     let record: BuildRecord;
     try {
       source = readConnectorSource(io.cwd);
-      assertPlainVersion(source.manifest);
       record = readBuildRecord(io.cwd);
     } catch (err) {
       return refusedFailures('build', [failureOf(err, 'manifest')], io);
