@@ -51,7 +51,7 @@ Every refusal from `init`, `check`, `build`, `sign` and `keygen` names the page 
 
 The SDK follows semantic versioning from 1.0.0:
 
-- **Breaking changes come only in a new major,** with migration steps in the [CHANGELOG](CHANGELOG.md). That covers the authoring API (what the package and its `/client` subpath export) and the `init`, `check`, `build`, `sign` and `keygen` commands.
+- **Breaking changes come only in a new major,** with migration steps in the [CHANGELOG](CHANGELOG.md). That covers the authoring API (what the package and its `/client` subpath export) and the `init`, `check`, `build`, `sign` and `keygen` commands. The `/artifact` and `/build` subpaths are for atrium's own tools and are not covered: build on the commands, not on them.
 - **Fixes land on the newest major only.**
 - **The SDK's version plays no part in what an Instance accepts.** The SDK is inlined into every Action's bundle, so a Connector built with an older SDK keeps running for as long as atrium accepts its Bundle Contract version, and you update the SDK when you choose. atrium's own promise for the Bundle Contract is on [versions](docs/versions.md).
 

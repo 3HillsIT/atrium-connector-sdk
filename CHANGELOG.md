@@ -4,7 +4,7 @@
 
 The SDK follows semantic versioning from 1.0.0:
 
-- **Breaking changes come only in a new major,** with migration steps in its entry here. That covers the authoring API (what `@3hillsit/atrium-connector-sdk` and `@3hillsit/atrium-connector-sdk/client` export) and the `atrium-connector` commands (`init`, `check`, `build`, `sign`, `keygen`): their options, their output files and their exit codes.
+- **Breaking changes come only in a new major,** with migration steps in its entry here. That covers the authoring API (what `@3hillsit/atrium-connector-sdk` and `@3hillsit/atrium-connector-sdk/client` export) and the `atrium-connector` commands (`init`, `check`, `build`, `sign`, `keygen`): their options, their output files and their exit codes. `@3hillsit/atrium-connector-sdk/artifact` and `@3hillsit/atrium-connector-sdk/build` are for atrium's own tools and are not covered.
 - **Fixes land on the newest major only.**
 - **The SDK's version plays no part in what an Instance accepts.** Only the Bundle Contract version (`CURRENT_CONNECTOR_API_VERSION`) does, and the SDK is inlined into every bundle, so a Connector built with an older SDK major keeps running for as long as atrium accepts its Bundle Contract version.
 
