@@ -79,7 +79,8 @@ export const build: Command = {
     io.out(
       `Built ${id} ${version}, unsigned: ${OUTPUT_DIRECTORY}/${unsigned.fileName}\n` +
         `Payload ${unsigned.payloadSha256}, recorded in ${BUILD_RECORD_FILE}. ` +
-        'An Instance Adds it once it is signed.',
+        'An Instance Adds it once it is signed: ' +
+        `atrium-connector sign --key <key file> ${OUTPUT_DIRECTORY}/${unsigned.fileName}`,
     );
     return 0;
   },
