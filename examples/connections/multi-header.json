@@ -1,0 +1,35 @@
+{
+  "_comment": [
+    "Sign-in kind multi-header: the admin enters a secret, sent in secretHeader, and settings, each sent in the header staticHeadersFromConfig names.",
+    "Replace the example values: apiBasePath, a healthCheckPath that fails with a wrong credential, the secret's header, and the settings' fields and headers. See docs/manifest.md in the SDK."
+  ],
+  "connection": {
+    "configSchema": {
+      "fields": [
+        {
+          "name": "instanceUrl",
+          "label": "Server URL",
+          "type": "string",
+          "required": true,
+          "description": "The address of the system, for example https://system.example.com"
+        },
+        {
+          "name": "tenant",
+          "label": "Tenant",
+          "type": "string",
+          "required": true,
+          "description": "The tenant the Integration works in."
+        }
+      ]
+    },
+    "request": {
+      "apiBasePath": "/api",
+      "healthCheckPath": "/session",
+      "auth": {
+        "type": "multi-header",
+        "secretHeader": "X-Api-Key",
+        "staticHeadersFromConfig": { "X-Tenant": "tenant" }
+      }
+    }
+  }
+}

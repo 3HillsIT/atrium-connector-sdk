@@ -1,0 +1,24 @@
+{
+  "_comment": [
+    "Sign-in kind oauth2: the system's API is protected by Microsoft Entra ID, and the Instance's own Microsoft registration signs in.",
+    "Replace the example values: apiBasePath, a healthCheckPath that fails with a wrong credential, and the scope of the system's API. See docs/manifest.md in the SDK."
+  ],
+  "connection": {
+    "configSchema": {
+      "fields": [
+        {
+          "name": "instanceUrl",
+          "label": "Server URL",
+          "type": "string",
+          "required": true,
+          "description": "The address of the system, for example https://system.example.com"
+        }
+      ]
+    },
+    "request": {
+      "apiBasePath": "/api",
+      "healthCheckPath": "/me",
+      "auth": { "type": "oauth2", "scope": "api://system.example.com/.default" }
+    }
+  }
+}

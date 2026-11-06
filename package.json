@@ -1,7 +1,7 @@
 {
   "name": "@3hillsit/atrium-connector-sdk",
-  "version": "1.0.0-beta.1",
-  "description": "SDK for authoring Atrium connectors and talking to the Atrium mediation broker without ever holding a raw credential.",
+  "version": "1.0.0-beta.2",
+  "description": "Build, check and sign Connectors for atrium. The handler never holds a credential: atrium's broker makes the calls.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -14,7 +14,12 @@
   "type": "module",
   "module": "src/index.ts",
   "types": "src/index.ts",
+  "bin": {
+    "atrium-connector": "bin/atrium-connector.ts"
+  },
   "files": [
+    "bin",
+    "docs",
     "src",
     "examples",
     "CHANGELOG.md"
@@ -27,6 +32,14 @@
     "./client": {
       "types": "./src/client.ts",
       "default": "./src/client.ts"
+    },
+    "./artifact": {
+      "types": "./src/artifact/index.ts",
+      "default": "./src/artifact/index.ts"
+    },
+    "./build": {
+      "types": "./src/build/index.ts",
+      "default": "./src/build/index.ts"
     }
   },
   "scripts": {

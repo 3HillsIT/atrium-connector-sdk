@@ -20,3 +20,14 @@ jobs:
       # bun test includes test/subpath-isolation.test.ts.
       - run: bun test
       - run: bun run typecheck
+      # The repo `atrium-connector init` writes, for each sign-in kind: from the
+      # packed SDK, through its own bun install, tests, typecheck and check.
+      # Steps of the required `check` job, so a failure blocks a merge: a job
+      # of their own isn't the required check, and a required job that
+      # `needs:` a failed one is skipped, which counts as passing.
+      - name: init --sign-in pat
+        run: scripts/check-init.sh pat
+      - name: init --sign-in multi-header
+        run: scripts/check-init.sh multi-header
+      - name: init --sign-in oauth2
+        run: scripts/check-init.sh oauth2
