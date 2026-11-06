@@ -10,7 +10,7 @@ The SDK follows semantic versioning from 1.0.0:
 
 Versions before 1.0.0, the `1.0.0-beta.N` pre-releases included, make no promise.
 
-## Unreleased
+## 1.0.0-beta.2
 
 A new Connector starts from `init` (#11972).
 
