@@ -41,7 +41,7 @@ The build moves into the SDK too, with a command to run it (#11227).
   - `build` does the same, then writes `dist/<id>-<version>.atrium.tar.gz` unsigned and records `{ version, payloadSha256, builtAt }` in `atrium-builds.json`, which the repo commits; the entry is the version's first build, never replaced. A version built again with bytes other than its first gives a warning naming both digests, every time, and still builds.
   - `build --try` builds `X.Y.Z-try.N+1` from a manifest saying `X.Y.Z`, N being the highest try of `X.Y.Z` in `atrium-builds.json`; manifest.json is never edited.
   - Both print which atrium Releases accept the Bundle Contract version built (v1: every atrium Release).
-- **The `write` rule:** an Action whose `httpMethods` (in manifest.json, or else in the code) include anything but GET, HEAD or OPTIONS, or that declares no `httpMethods` at all, must say `"write": true`, or `"write": false` when it only reads (a search sent as POST). `check` and `build` fail it otherwise: an Action that says nothing about its methods is unknown, and counts as a write. The published manifest still carries only `"write": true`.
+- **The `write` rule:** an Action whose `httpMethods` (in manifest.json, or else in the code) include anything but GET (the one read atrium's broker sends), or that declares no `httpMethods` at all, must say `"write": true`, or `"write": false` when it only reads (a search sent as POST). `check` and `build` fail it otherwise: an Action that says nothing about its methods is unknown, and counts as a write. The published manifest still carries only `"write": true`.
 
 Signing moves out of atrium too: a customer's developer signs with their own Customer Key (#11227, #11228).
 

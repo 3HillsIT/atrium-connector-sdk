@@ -30,12 +30,12 @@ It doesn't compare types or formats inside the properties. Keep those equal by h
 
 **An Action that may change something says so with `write`.**
 
-Only `"write": true` in `manifest.json` puts a Tool behind atrium's write approval. Without it the Tool runs as a read, with nobody's approval. `check` fails an Action that has no `write` at all and either sends anything but `GET`, `HEAD` or `OPTIONS` (by `httpMethods` in the manifest, or else in the code) or declares no `httpMethods` anywhere. An Action that says nothing about its methods is unknown, not a read, so it counts as a write until it declares one or the other:
+Only `"write": true` in `manifest.json` puts a Tool behind atrium's write approval. Without it the Tool runs as a read, with nobody's approval. `check` fails an Action that has no `write` at all and either sends anything but `GET` (by `httpMethods` in the manifest, or else in the code) or declares no `httpMethods` anywhere. An Action that says nothing about its methods is unknown, not a read, so it counts as a write until it declares one or the other:
 
 - `"write": true`: it creates, changes, deletes, sends or triggers something.
 - `"write": false`: it only reads, though it sends more than GET (a search sent as `POST`).
 
-`write` is `true` or `false`, or left out for a read whose `httpMethods` are only `GET` (or `HEAD`, `OPTIONS`). When you aren't sure, it is a write. Making a read Action a write later is a change the admin has to confirm when they Add the new version.
+`write` is `true` or `false`, or left out for a read whose `httpMethods` are only `GET`. When you aren't sure, it is a write. Making a read Action a write later is a change the admin has to confirm when they Add the new version.
 
 ## loads-cleanly
 

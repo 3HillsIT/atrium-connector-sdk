@@ -27,8 +27,12 @@ export interface ExportedAction {
   httpMethods?: unknown;
 }
 
-/** The HTTP methods that only read. Any other one is a write unless the manifest says it isn't. */
-const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+/**
+ * The HTTP methods that only read. Any other one is a write unless the
+ * manifest says it isn't. atrium's broker sends only GET, POST, PUT, PATCH and
+ * DELETE, so GET is the one read an Action can make.
+ */
+const READ_METHODS = new Set(['GET']);
 
 /**
  * The entry module's exports, bundled and imported as the Action bundles
@@ -169,7 +173,7 @@ function parityFailures(action: SourceManifestAction, code: ExportedAction): Che
 
 /**
  * An Action must say whether it changes something, unless it declares that it
- * sends only GET (or HEAD, OPTIONS): `"write": true` puts its Tools behind
+ * sends only GET: `"write": true` puts its Tools behind
  * atrium's write approval, and without it they run with nobody's.
  * `"write": false` is the author's word that it only reads (a search sent as
  * POST), and is never second-guessed. An Action that declares no methods
@@ -186,7 +190,7 @@ function writeFlagFailure(
       rule: 'write-flag',
       message:
         `The action "${action.name}" declares "write": ${JSON.stringify(write)}; it is true or ` +
-        'false, or left out for an Action whose httpMethods are only GET, HEAD or OPTIONS.',
+        'false, or left out for an Action whose httpMethods are only GET.',
     };
   }
   if (write !== undefined) return undefined;

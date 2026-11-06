@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { ENTRY_SOURCE, makeConnectorRepo, runCommand } from '../support/connector-repo';
 import type { ConnectorRepo } from '../support/connector-repo';
@@ -92,6 +92,18 @@ describe('check fails, naming the rule and its guide page', () => {
     const declared = await runCommand(repo.dir, 'check');
     expect(declared.stderr).toBe('');
     expect(declared.exitCode).toBe(0);
+  });
+
+  test('an Action sending HEAD and no "write": the broker sends only GET as a read', async () => {
+    repo.editManifest((manifest) => {
+      manifest.actions[0].httpMethods = ['HEAD'];
+    });
+
+    const run = await runCommand(repo.dir, 'check');
+
+    expect(run.exitCode).toBe(1);
+    expect(rulesIn(run.stderr)).toEqual(['write-flag']);
+    expect(run.stderr).toContain('The action "list_things" sends HEAD');
   });
 
   test('a parity break: another description in the manifest than in the code', async () => {
@@ -246,6 +258,24 @@ export const archiveThing = defineAction({
     expect(rulesIn(run.stderr)).toEqual(['connection']);
     expect(run.stderr).toContain('headerName');
     expect(run.stderr).toContain('docs/manifest.md');
+  });
+
+  test('an installed SDK that throws when it loads, naming the install page', async () => {
+    const sdk = join(repo.dir, 'node_modules', '@3hillsit', 'atrium-connector-sdk');
+    rmSync(sdk);
+    mkdirSync(sdk);
+    writeFileSync(
+      join(sdk, 'package.json'),
+      JSON.stringify({ name: '@3hillsit/atrium-connector-sdk', type: 'module', exports: { '.': './index.ts' } }),
+    );
+    writeFileSync(join(sdk, 'index.ts'), "throw new Error('half installed');\n");
+
+    const run = await runCommand(repo.dir, 'check');
+
+    expect(run.exitCode).toBe(1);
+    expect(rulesIn(run.stderr)).toEqual(['sdk-installed']);
+    expect(run.stderr).toContain('throws when it is loaded: half installed');
+    expect(run.stderr).toContain('docs/build-and-sign.md');
   });
 
   test('a folder that is not a Connector repo', async () => {

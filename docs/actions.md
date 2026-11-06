@@ -88,7 +88,7 @@ An Action that changes anything in the system (creates, updates, deletes, sends,
 - With `"write": true`, a call to its Tool waits for approval by whoever the Tool's approval policy names, unless an admin has set the Tool or its Workspace to run writes without approval in atrium.
 - Without it, the Tool is a read and runs at once, for anyone the Workspace lets call it.
 
-`httpMethods` doesn't decide it: a search sent as `POST` is a read (`"write": false`), and a `GET` that triggers a job is a write. `check` refuses an Action that says neither and sends anything but `GET`, `HEAD` or `OPTIONS`, or declares no `httpMethods` at all (the `write-flag` rule on [rules.md](rules.md)). When in doubt, it is a write.
+`httpMethods` doesn't decide it: a search sent as `POST` is a read (`"write": false`), and a `GET` that triggers a job is a write. `check` refuses an Action that says neither and sends anything but `GET`, or declares no `httpMethods` at all (the `write-flag` rule on [rules.md](rules.md)). When in doubt, it is a write.
 
 ## What a handler never does
 

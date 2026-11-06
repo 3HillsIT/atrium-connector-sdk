@@ -34,9 +34,16 @@ export async function readBundleContractVersion(packageDir: string): Promise<num
         'a Bundle Contract version from. Run `bun install` in the package directory.',
     );
   }
-  const sdk = (await import(pathToFileURL(resolved).href)) as {
-    CURRENT_CONNECTOR_API_VERSION?: unknown;
-  };
+  let sdk: { CURRENT_CONNECTOR_API_VERSION?: unknown };
+  try {
+    sdk = await import(pathToFileURL(resolved).href);
+  } catch (err) {
+    throw new BuildRefusal(
+      'sdk-installed',
+      `The SDK at ${resolved} throws when it is loaded: ` +
+        `${err instanceof Error ? err.message : String(err)}. Run \`bun install\` in the package directory.`,
+    );
+  }
   const version = sdk.CURRENT_CONNECTOR_API_VERSION;
   if (typeof version !== 'number' || !Number.isInteger(version)) {
     throw new BuildRefusal(
