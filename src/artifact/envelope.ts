@@ -548,7 +548,7 @@ export async function unpackSignedPayload(
   if (!digestsEqual(payloadSha256, blob.payloadSha256)) {
     throw artifactError(
       'payload-digest-mismatch',
-      'The artifact does not match its signature — it was altered or truncated in transit. ' +
+      'The artifact does not match its signature: it was altered or truncated in transit. ' +
         `Signed ${blob.payloadSha256}, received ${payloadSha256}.`,
       { expected: blob.payloadSha256, actual: payloadSha256 },
     );

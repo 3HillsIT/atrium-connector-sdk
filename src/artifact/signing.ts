@@ -312,7 +312,7 @@ export async function verifySignatures(
   }
   throw artifactError(
     'signature-invalid',
-    'The signature does not match this artifact. Do not install it; contact 3 Hills IT.',
+    'The signature does not match this artifact. Do not install it.',
     { keyIds: seen },
   );
 }
