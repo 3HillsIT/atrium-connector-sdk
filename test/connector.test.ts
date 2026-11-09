@@ -36,6 +36,19 @@ describe('defineAction / runAction validation', () => {
     expect(handlerRan).toBe(false);
   });
 
+  test("an invalid input's error names the action, each property's path and zod's message", async () => {
+    const action = defineAction({
+      id: 'nested',
+      description: 'test',
+      inputSchema: z.object({ item: z.object({ name: z.string() }), count: z.number().int() }),
+      handler: async () => ({}),
+    });
+    await expect(runAction(action, stubCtx, { item: {}, count: 1.5 })).rejects.toThrow(
+      'Invalid input for action "nested": item.name: Invalid input: expected string, received undefined; ' +
+        'count: Invalid input: expected int, received number',
+    );
+  });
+
   test('a handler returning output that fails outputSchema throws', async () => {
     const action = defineAction({
       id: 'bad-output',

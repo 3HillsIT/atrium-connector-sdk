@@ -51,7 +51,7 @@ export function defineAction<TInput, TOutput>(
 
 function formatZodError(error: ZodError, label: string): string {
   const issues = error.issues
-    .map((issue) => `${issue.path.length ? issue.path.join('.') : '(root)'}: ${issue.message}`)
+    .map((issue) => `${issue.path.length ? issue.path.map(String).join('.') : '(root)'}: ${issue.message}`)
     .join('; ');
   return `${label}: ${issues}`;
 }

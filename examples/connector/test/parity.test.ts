@@ -20,7 +20,7 @@ interface ManifestAction {
 interface CodeAction {
   id: string;
   description?: string;
-  inputSchema: z.ZodTypeAny;
+  inputSchema: z.ZodType;
   httpMethods?: string[];
   handler: (...args: unknown[]) => unknown;
 }
@@ -49,17 +49,33 @@ for (const value of Object.values(entry)) {
 }
 
 /** The JSON Schema types a zod schema can stand for; undefined when this test doesn't know it. */
-function jsonTypes(schema: z.ZodTypeAny): string[] | undefined {
-  if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable || schema instanceof z.ZodDefault) {
-    return jsonTypes(schema._def.innerType);
+function jsonTypes(schema: z.ZodType): string[] | undefined {
+  if (
+    schema instanceof z.ZodOptional ||
+    schema instanceof z.ZodNullable ||
+    schema instanceof z.ZodDefault ||
+    schema instanceof z.ZodPrefault ||
+    schema instanceof z.ZodCatch ||
+    schema instanceof z.ZodReadonly
+  ) {
+    return jsonTypes(schema.unwrap() as z.ZodType);
   }
-  if (schema instanceof z.ZodEffects) return jsonTypes(schema._def.schema);
-  if (schema instanceof z.ZodString || schema instanceof z.ZodEnum) return ['string'];
+  // A .transform() is a pipe; a client sends what goes in.
+  if (schema instanceof z.ZodPipe) return jsonTypes(schema.in as z.ZodType);
+  // z.email(), z.url(), z.uuid() and the other string formats are strings.
+  if (schema instanceof z.ZodString || schema instanceof z.ZodStringFormat || schema instanceof z.ZodEnum) {
+    return ['string'];
+  }
   if (schema instanceof z.ZodNumber) return schema.isInt ? ['integer', 'number'] : ['number'];
   if (schema instanceof z.ZodBoolean) return ['boolean'];
   if (schema instanceof z.ZodArray) return ['array'];
   if (schema instanceof z.ZodObject || schema instanceof z.ZodRecord) return ['object'];
   return undefined;
+}
+
+/** Whether a call may leave the property out: what zod itself checks. */
+function isOptional(schema: z.ZodType): boolean {
+  return schema.safeParse(undefined).success;
 }
 
 describe('manifest.json and the code', () => {
@@ -77,11 +93,11 @@ describe('manifest.json and the code', () => {
 
       test('has the same input properties, required list and property types', () => {
         expect(code().inputSchema).toBeInstanceOf(z.ZodObject);
-        const shape = (code().inputSchema as z.ZodObject<z.ZodRawShape>).shape;
+        const shape = (code().inputSchema as z.ZodObject).shape as Record<string, z.ZodType>;
         const properties = action.inputSchema.properties ?? {};
 
         expect(Object.keys(shape).sort()).toEqual(Object.keys(properties).sort());
-        expect(Object.keys(shape).filter((key) => !shape[key]!.isOptional()).sort()).toEqual(
+        expect(Object.keys(shape).filter((key) => !isOptional(shape[key]!)).sort()).toEqual(
           [...(action.inputSchema.required ?? [])].sort(),
         );
         for (const [key, property] of Object.entries(properties)) {

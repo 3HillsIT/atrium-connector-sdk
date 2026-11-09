@@ -147,7 +147,7 @@ function parityFailures(action: SourceManifestAction, code: ExportedAction): Che
         : [];
     const required = Array.isArray(schema.required) ? (schema.required as unknown[]).map(String) : [];
     const codeProperties = Object.keys(shape);
-    const codeRequired = codeProperties.filter((key) => !shape[key]!.isOptional());
+    const codeRequired = codeProperties.filter((key) => !acceptsUndefined(shape[key]!));
 
     const differences = [
       ...difference(codeProperties, properties).map((key) => `"${key}" is in the code's schema only`),
@@ -222,18 +222,35 @@ function declaredMethods(methods: unknown): unknown[] | undefined {
   return Array.isArray(methods) && methods.length > 0 ? methods : undefined;
 }
 
-/** A zod object schema's shape, read by duck type so the Connector's zod copy doesn't matter. */
-function zodObjectShape(
-  schema: unknown,
-): Record<string, { isOptional: () => boolean }> | undefined {
+type ZodLike = { safeParse: (value: unknown) => { success: boolean } };
+
+/**
+ * A zod object schema's shape, read by duck type so the Connector's zod copy
+ * doesn't matter: zod 3 and zod 4 both give an object schema a `shape` and
+ * every schema a `safeParse`.
+ */
+function zodObjectShape(schema: unknown): Record<string, ZodLike> | undefined {
   if (typeof schema !== 'object' || schema === null) return undefined;
   const shape = (schema as { shape?: unknown }).shape;
   if (typeof shape !== 'object' || shape === null) return undefined;
   const entries = Object.values(shape as Record<string, unknown>);
-  if (!entries.every((value) => typeof (value as { isOptional?: unknown })?.isOptional === 'function')) {
+  if (!entries.every((value) => typeof (value as { safeParse?: unknown })?.safeParse === 'function')) {
     return undefined;
   }
-  return shape as Record<string, { isOptional: () => boolean }>;
+  return shape as Record<string, ZodLike>;
+}
+
+/**
+ * Whether a call may leave the property out: what zod's own `isOptional()`
+ * checks, which zod 4 deprecates in favour of this. A schema that throws on
+ * `undefined` (a transform that reads it) doesn't take it.
+ */
+function acceptsUndefined(schema: ZodLike): boolean {
+  try {
+    return schema.safeParse(undefined).success;
+  } catch {
+    return false;
+  }
 }
 
 function difference(a: string[], b: string[]): string[] {

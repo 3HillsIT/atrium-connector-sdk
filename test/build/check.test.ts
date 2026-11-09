@@ -41,6 +41,23 @@ describe('check on a Connector that keeps the rules', () => {
     expect(run.stderr).toBe('');
     expect(run.exitCode).toBe(0);
   });
+
+  test('counts a property a call may leave out as optional: .optional(), .default(), a transform after .optional()', async () => {
+    repo.writeEntry(
+      ENTRY_SOURCE.replace(
+        "inputSchema: z.object({ status: z.string().optional() }),",
+        "inputSchema: z.object({ status: z.string().default('open'), tag: z.string().optional().transform((t) => t?.trim()) }),",
+      ),
+    );
+    repo.editManifest((manifest) => {
+      manifest.actions[0].inputSchema.properties.tag = { type: 'string' };
+    });
+
+    const run = await runCommand(repo.dir, 'check');
+
+    expect(run.stderr).toBe('');
+    expect(run.exitCode).toBe(0);
+  });
 });
 
 describe('check fails, naming the rule and its guide page', () => {
