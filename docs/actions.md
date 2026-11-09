@@ -44,7 +44,7 @@ export { searchIssues } from './actions/search-issues';
 export { createIssue } from './actions/create-issue';
 ```
 
-Import `z` from the SDK, so your schemas use the zod the SDK was written for.
+Import `z` from the SDK, so your schemas use the zod the SDK was written for: zod 4 ([zod.dev](https://zod.dev)).
 
 | Field | |
 |---|---|
