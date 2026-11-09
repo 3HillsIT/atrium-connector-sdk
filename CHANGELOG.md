@@ -14,18 +14,20 @@ Versions before 1.0.0, the `1.0.0-beta.N` pre-releases included, make no promise
 
 zod 4 replaces zod 3 (#12034).
 
-- **The SDK's `z` is zod 4.** The SDK depends on `zod` `^4.6.7` and re-exports its `z` as before (`import { z } from '@3hillsit/atrium-connector-sdk'`); nothing else in the authoring API changes. zod 3 is affected by GHSA-mrhx-c7xc-m3w5 (CVE-2023-54404: validating an oversized constrained collection can exhaust memory), first fixed in zod 4.6.6. It lands before 1.0.0, while a beta makes no promise, so 1.0.0 starts on zod 4.
+- **The SDK's `z` is zod 4.** The SDK depends on `zod` `^4.6.7` and re-exports its `z` as before (`import { z } from '@3hillsit/atrium-connector-sdk'`); nothing else in the authoring API changes. `z` stays zod's own, so a later zod major comes only in a new SDK major. zod 3 is affected by GHSA-mrhx-c7xc-m3w5 (CVE-2023-54404: validating an oversized constrained collection can exhaust memory), first fixed in zod 4.6.6. It lands before 1.0.0, while a beta makes no promise, so 1.0.0 starts on zod 4.
 - **What to change in a Connector's schemas,** where it uses what zod 4 changed ([zod's migration guide](https://zod.dev/v4/changelog)):
-  - A custom message is `error`, not `message`, `errorMap`, `invalid_type_error` or `required_error`: `z.enum(names, { error: 'op must be one of: …' })`. An `errorMap` no longer compiles.
+  - A custom message is `error`: `z.enum(names, { error: 'op must be one of: …' })`. `message` still works but is deprecated; `errorMap`, `invalid_type_error` and `required_error` are gone and no longer compile.
   - `z.record` takes the key schema too: `z.record(z.string(), z.unknown())`.
   - `.strict()` and `.passthrough()` still work but are deprecated: `z.strictObject({…})`, `z.looseObject({…})`. So are `z.string().email()`, `.url()`, `.uuid()` and the other formats: `z.email()`, `z.url()`, `z.uuid()`.
   - `.default(value)` takes the output type and skips the schema when the property is missing; `.prefault(value)` parses the value as zod 3's `.default` did.
+  - A `ZodError` has `issues` and no `errors`; `.format()` and `.flatten()` are deprecated for `z.treeifyError(error)` and `z.flattenError(error)`.
+  - `z.function()` takes its parameters and result up front, `z.function({ input: [z.string()], output: z.number() })`; `.args()` and `.returns()` are gone.
   - zod's default messages read differently (`Invalid input: expected string, received number`), so a test matching zod 3's text needs zod 4's. `runAction`'s message keeps its form: `Invalid input for action "<id>": <path>: <message>; …`.
   - Code reading zod's internals changes: there is no `ZodEffects` (`.refine()` keeps the schema's class, `.transform()` makes a `ZodPipe` whose input side is `.in`), no `_def.typeName` or `ZodFirstPartyTypeKind` (use `instanceof`, or `schema.def.type`), no `z.AnyZodObject` (`z.ZodObject`), an object's `_def.shape` is an object rather than a function (use `.shape`), and `isOptional()` is deprecated (`schema.safeParse(undefined).success`).
   - `z.ZodType<Output, Input>` no longer makes the input type the output type, so a schema with a `.transform()` is an `inputSchema` without a cast.
 - **The parity tests `init` writes** (`test/parity.test.ts`) are zod 4's: a transform's type is its input's, `z.email()` and the other formats count as strings, and a property is optional when its schema accepts `undefined`. A repo `init` wrote before fails them on zod 4; copy `examples/connector/test/parity.test.ts` over yours and keep your `WRITE_ACTIONS`.
 - **`check`'s `parity` rule** reads a property as optional when its schema accepts `undefined`, which is what `isOptional()` did. A schema that throws on `undefined` (a transform reading it) now counts as required instead of stopping `check`.
-- **Each Action's bundle is larger:** the bundle inlines zod, and zod 4's `z` doesn't tree-shake, so an Action takes about 750 KB before compression, where zod 3 made about 120 KB. atrium's reader refuses a payload that unpacks to more than 128 MB, about 140 Actions now.
+- **Each Action's bundle is larger:** the bundle inlines zod, and zod 4's `z` doesn't tree-shake, so an Action takes about 750 KB before compression, where zod 3 made about 120 KB. atrium's reader refuses a payload that unpacks to more than 128 MB: about 170 Actions of the example's size, about 140 of the ADITO Connector's (0.9 MB each).
 
 ## 1.0.0-beta.2
 

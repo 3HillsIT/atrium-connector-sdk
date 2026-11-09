@@ -73,9 +73,13 @@ function jsonTypes(schema: z.ZodType): string[] | undefined {
   return undefined;
 }
 
-/** Whether a call may leave the property out: what zod itself checks. */
-function isOptional(schema: z.ZodType): boolean {
-  return schema.safeParse(undefined).success;
+/** Whether a call may leave the property out; a schema that throws on undefined doesn't take it. */
+function acceptsUndefined(schema: z.ZodType): boolean {
+  try {
+    return schema.safeParse(undefined).success;
+  } catch {
+    return false;
+  }
 }
 
 describe('manifest.json and the code', () => {
@@ -97,7 +101,7 @@ describe('manifest.json and the code', () => {
         const properties = action.inputSchema.properties ?? {};
 
         expect(Object.keys(shape).sort()).toEqual(Object.keys(properties).sort());
-        expect(Object.keys(shape).filter((key) => !isOptional(shape[key]!)).sort()).toEqual(
+        expect(Object.keys(shape).filter((key) => !acceptsUndefined(shape[key]!)).sort()).toEqual(
           [...(action.inputSchema.required ?? [])].sort(),
         );
         for (const [key, property] of Object.entries(properties)) {
