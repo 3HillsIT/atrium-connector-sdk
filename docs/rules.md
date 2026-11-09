@@ -22,7 +22,7 @@ An AI client sees the manifest's description and input schema; your handler gets
 
 - the exported Actions with the manifest's: an exported Action the manifest doesn't declare fails too;
 - each `description`, when the code has one;
-- each zod object `inputSchema`'s property names and required list (a property is required unless it is `.optional()`) with the manifest's `properties` and `required`.
+- each zod object `inputSchema`'s property names and required list (a property is required unless a call may leave it out: `.optional()`, or `.default()`) with the manifest's `properties` and `required`.
 
 It doesn't compare types or formats inside the properties. Keep those equal by hand, and change the code and the manifest in the same commit.
 
