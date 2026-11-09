@@ -10,7 +10,11 @@ The SDK follows semantic versioning from 1.0.0:
 
 Versions before 1.0.0, the `1.0.0-beta.N` pre-releases included, make no promise.
 
-## Unreleased
+## 1.0.0
+
+The first stable release (#11229). Both promises apply from this version on: the SDK's semantic versioning above, and atrium's promise for the Bundle Contract (a version leaves an Instance only in an atrium MAJOR, after a Release that accepts both and 90 days' notice; [versions](docs/versions.md)). It is published on the `latest` dist-tag, so installing needs no `@next` any more.
+
+What changed since 0.4.0, the last version on Azure DevOps: the package's new name and home (1.0.0-beta.1), the Artifact format, the build, `check`, `build`, `sign`, `keygen` and `init`, and the developer guide (1.0.0-beta.2, below), and zod 4 (here). The guided build (`docs/guided-build.md`) is still a stub; it follows in a minor.
 
 zod 4 replaces zod 3 (#12034).
 

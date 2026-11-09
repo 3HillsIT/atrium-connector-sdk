@@ -6,7 +6,7 @@ Build Connectors for atrium. A Connector gives AI clients Tools that read from a
 bun add --exact @3hillsit/atrium-connector-sdk
 ```
 
-Until 1.0.0 it is published on the `next` dist-tag only: add `@next` or an exact version (`bun add --exact @3hillsit/atrium-connector-sdk@next`). It needs [Bun](https://bun.sh). It is MIT-licensed ([LICENSE](LICENSE)).
+It needs [Bun](https://bun.sh). It is MIT-licensed ([LICENSE](LICENSE)).
 
 ## Quick start
 
@@ -16,8 +16,6 @@ Until 1.0.0 it is published on the `next` dist-tag only: add `@next` or an exact
    bunx -p @3hillsit/atrium-connector-sdk atrium-connector init my-connector
    cd my-connector && bun install
    ```
-
-   Until 1.0.0 the package is published on the `next` dist-tag only, so the first command needs `@next` or an exact version: `bunx -p @3hillsit/atrium-connector-sdk@next atrium-connector init my-connector`. The repo it writes pins that exact version.
 
    It asks the Connector's id, its display name and how the system signs in, and writes a repo that passes its tests and `check` as it stands: a manifest, one read and one write Action with their tests, and `AGENTS.md` for a coding agent ([concepts](docs/concepts.md#what-a-connector-repo-holds)).
 1. Replace the example Actions with your system's: the manifest and its `connection` block ([manifest](docs/manifest.md)), then each Action ([actions](docs/actions.md)).
