@@ -4,7 +4,7 @@ This repo is an atrium Connector, written with `@3hillsit/atrium-connector-sdk`.
 
 ## Docs
 
-The SDK's docs are in `node_modules/@3hillsit/atrium-connector-sdk/docs/` (after `bun install`). They describe exactly the SDK version installed here. Start with `concepts.md`.
+The SDK's docs are in `node_modules/@3hillsit/atrium-connector-sdk/docs/` (after `bun install`). They describe exactly the SDK version installed here. Start with `concepts.md`. `bunx atrium-connector docs` opens them in your browser, as one page.
 
 ## Commands
 

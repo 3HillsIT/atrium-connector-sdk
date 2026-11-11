@@ -60,7 +60,7 @@ describe('build', () => {
     expect(record().builds).toEqual([
       { version: '1.2.0', payloadSha256, builtAt: expect.any(String) },
     ]);
-    expect(run.stdout).toContain(`Payload ${payloadSha256}, recorded in ${BUILD_RECORD_FILE}.`);
+    expect(run.stdout).toContain(`Payload   ${payloadSha256}`);
   });
 
   test('writes nothing when a check fails', async () => {
@@ -179,7 +179,7 @@ describe('a version built again with other bytes', () => {
     const rebuilt = await sha256Hex(readEnvelope(artifact('1.2.0')).payload);
 
     expect(rebuilt).not.toBe(first.payloadSha256);
-    expect(run.stderr).toContain(`Warning: ${BUILD_RECORD_FILE} has thing-connector 1.2.0 built on ${first.builtAt}`);
+    expect(run.stderr).toContain(`! ${BUILD_RECORD_FILE} has thing-connector 1.2.0 built on ${first.builtAt}`);
     expect(run.stderr).toContain(first.payloadSha256);
     expect(run.stderr).toContain(rebuilt);
     expect(run.stdout).toContain('Built thing-connector 1.2.0, unsigned');
@@ -197,7 +197,7 @@ describe('a version built again with other bytes', () => {
     const third = await build();
 
     for (const run of [second, third]) {
-      expect(run.stderr).toContain(`Warning: ${BUILD_RECORD_FILE} has thing-connector 1.2.0 built on ${first.builtAt}`);
+      expect(run.stderr).toContain(`! ${BUILD_RECORD_FILE} has thing-connector 1.2.0 built on ${first.builtAt}`);
       expect(run.stderr).toContain(first.payloadSha256);
     }
     expect(record().builds).toEqual([first]);

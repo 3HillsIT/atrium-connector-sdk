@@ -15,7 +15,7 @@ afterEach(() => repo.remove());
 
 /** The rule names a failed run printed, in order: each failure starts a line `<rule>: `. */
 function rulesIn(stderr: string): string[] {
-  return [...stderr.matchAll(/^([a-z-]+): /gm)].map((match) => match[1]!);
+  return [...stderr.matchAll(/^✗ ([a-z-]+): /gm)].map((match) => match[1]!);
 }
 
 describe('check on a Connector that keeps the rules', () => {
@@ -309,7 +309,7 @@ describe('the command line', () => {
     const run = await runCommand(repo.dir, 'publish');
 
     expect(run.exitCode).toBe(2);
-    expect(run.stderr).toContain('there is no command "publish"');
+    expect(run.stderr).toContain('atrium-connector has no command "publish"');
     expect(run.stderr).toContain('check');
     expect(run.stderr).toContain('build [--try]');
   });

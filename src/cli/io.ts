@@ -4,6 +4,9 @@ import { parseArgs } from 'node:util';
 import type { ParseArgsConfig } from 'node:util';
 import { guidePagePath, RULES } from '../build';
 import type { CheckFailure, RuleName } from '../build';
+import { openInBrowser } from './open';
+import { createOutput, follow, usageWords } from './output';
+import type { Lines, Output, OutputEnv, Words } from './output';
 
 export interface CliIO {
   /** The folder the command runs in: the Connector repo. */
@@ -20,6 +23,29 @@ export interface CliIO {
    * a command then takes every answer as an option.
    */
   ask?: (question: string) => Promise<string | null>;
+  /** Opens a file in the browser; true when it opened. Absent when nothing can open one (a test). */
+  open?: (path: string) => Promise<boolean>;
+  /** The environment the output reads (`NO_COLOR`, `FORCE_COLOR`, `TERM`, the locale). None: plain ASCII. */
+  env?: OutputEnv;
+  /** Whether stdout and stderr are terminals, which is when they get colour. */
+  stdoutIsTTY?: boolean;
+  stderrIsTTY?: boolean;
+}
+
+const outputs = new WeakMap<CliIO, Output>();
+
+/** How a command prints: the lines of Brand v2, over the IO's own `out` and `err`. */
+export function ui(io: CliIO): Output {
+  let output = outputs.get(io);
+  if (!output) {
+    output = createOutput({
+      stdout: { isTTY: io.stdoutIsTTY, writeLine: io.out },
+      stderr: { isTTY: io.stderrIsTTY, writeLine: io.err },
+      env: io.env ?? {},
+    });
+    outputs.set(io, output);
+  }
+  return output;
 }
 
 export interface Command {
@@ -39,6 +65,10 @@ export function consoleIO(): CliIO {
     now: () => new Date(),
     // Bun's prompt() writes the question and reads one line from stdin.
     ask: process.stdin.isTTY ? async (question) => prompt(question) : undefined,
+    open: openInBrowser,
+    env: process.env,
+    stdoutIsTTY: process.stdout.isTTY,
+    stderrIsTTY: process.stderr.isTTY,
   };
 }
 
@@ -56,8 +86,8 @@ export function parseCommandArgs<T extends NonNullable<ParseArgsConfig['options'
   io: CliIO,
   positionals: number | [min: number, max: number] = 0,
 ): { values: Record<keyof T, unknown>; positionals: string[] } | undefined {
-  const usageError = (message: string) => {
-    io.err(`${message}\nusage: atrium-connector ${command.usage}`);
+  const refuseUsage = (message: string) => {
+    usageError(command, message, io);
     return undefined;
   };
   const [least, most] = typeof positionals === 'number' ? [positionals, positionals] : positionals;
@@ -65,13 +95,13 @@ export function parseCommandArgs<T extends NonNullable<ParseArgsConfig['options'
   try {
     parsed = parseArgs({ args, options, strict: true, allowPositionals: most > 0 });
   } catch (err) {
-    return usageError(err instanceof Error ? err.message : String(err));
+    return refuseUsage(err instanceof Error ? err.message : String(err));
   }
   if (parsed.positionals.length < least) {
-    return usageError(`Missing ${plural(least - parsed.positionals.length, 'argument', 'arguments')}.`);
+    return refuseUsage(`Missing ${plural(least - parsed.positionals.length, 'argument', 'arguments')}.`);
   }
   if (parsed.positionals.length > most) {
-    return usageError(`Unexpected argument '${parsed.positionals[most]}'.`);
+    return refuseUsage(`Unexpected argument '${parsed.positionals[most]}'.`);
   }
   return {
     values: parsed.values as unknown as Record<keyof T, unknown>,
@@ -91,13 +121,25 @@ export function requiredOption(
 ): string | undefined {
   const value = values[name];
   if (typeof value === 'string' && value.trim() !== '') return value;
-  io.err(`Option '--${name}' is required.\nusage: atrium-connector ${command.usage}`);
+  usageError(command, `Option '--${name}' is required.`, io);
   return undefined;
 }
 
+/** A usage error, on stderr: what is wrong, then the usage line. Exit code 2 is the caller's. */
+export function usageError(command: Pick<Command, 'usage'>, message: string, io: CliIO): void {
+  ui(io).stderr.failure(message);
+  ui(io).stderr.text(['usage: atrium-connector ', ...usageWords(command.usage)]);
+}
+
 /** The line under a refusal naming the guide page that explains its rule. */
-export function guideLine(rule: RuleName): string {
-  return `  Guide: ${guidePagePath(RULES[rule].page)}`;
+export function guideLine(rule: RuleName): Words {
+  return ['  Guide: ', follow(guidePagePath(RULES[rule].page))];
+}
+
+/** A refusal's problem and the guide page of its rule, on `lines`. */
+export function printProblem(lines: Lines, rule: RuleName, problem: string): void {
+  lines.failure(problem);
+  lines.text(guideLine(rule));
 }
 
 /**
@@ -105,7 +147,7 @@ export function guideLine(rule: RuleName): string {
  * was written.` and the guide page of its rule. Returns the exit code, 1.
  */
 export function refused(command: string, rule: RuleName, message: string, io: CliIO): number {
-  io.err(`${command} failed: ${message} Nothing was written.\n${guideLine(rule)}`);
+  printProblem(ui(io).stderr, rule, `${command} failed: ${message} Nothing was written.`);
   return 1;
 }
 
@@ -115,10 +157,9 @@ export function refused(command: string, rule: RuleName, message: string, io: Cl
  * written or signed.` Returns the exit code, 1.
  */
 export function refusedFailures(command: string, failures: CheckFailure[], io: CliIO): number {
-  for (const failure of failures) {
-    io.err(`${failure.rule}: ${failure.message}\n${guideLine(failure.rule)}`);
-  }
-  io.err(`${command} failed: ${plural(failures.length, 'problem', 'problems')}. Nothing was written or signed.`);
+  const lines = ui(io).stderr;
+  for (const failure of failures) printProblem(lines, failure.rule, `${failure.rule}: ${failure.message}`);
+  lines.failure(`${command} failed: ${plural(failures.length, 'problem', 'problems')}. Nothing was written or signed.`);
   return 1;
 }
 

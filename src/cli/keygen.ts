@@ -8,7 +8,7 @@
 import { chmodSync, existsSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { keyFileText, keygenPrintout, makeKeyFile } from './key-file';
-import { parseCommandArgs, refused, requiredOption } from './io';
+import { parseCommandArgs, refused, requiredOption, ui } from './io';
 import type { Command } from './io';
 
 /** The longest name a key may have: the Console's limit, so the name can be the one registered. */
@@ -49,15 +49,17 @@ export const keygen: Command = {
     chmodSync(outPath, 0o600);
 
     io.out(keygenPrintout(file).trimEnd());
-    io.err(
-      [
-        'This file is the only copy of the private key. Keep it somewhere safe; a password manager is one option.',
-        `Wrote the key "${name}" (key ${file.keyId}) to ${outPath}, mode 600.`,
-        'Do not commit it. Delete any local copy where signing does not run (a CI secret, say, is the one place it is needed).',
-        'If it is lost, remove the key in the Console and make a new one.',
-        "Register the two lines above in the Console, under your account's Customer Keys. Your company's Instances trust the key once the Console's next Customer Key List reaches them.",
-      ].join('\n\n'),
-    );
+    // Standard output carries only the two lines the Console registers; the rest is stderr.
+    const note = ui(io).stderr;
+    note.warning('This file is the only copy of the private key. Keep it somewhere safe; a password manager is one option.');
+    note.text();
+    note.success(`Wrote the key "${name}" (key ${file.keyId}) to ${outPath}, mode 600.`);
+    note.text();
+    note.text('Do not commit it. Delete any local copy where signing does not run (a CI secret, say, is the one place it is needed).');
+    note.text();
+    note.text('If it is lost, remove the key in the Console and make a new one.');
+    note.text();
+    note.text("Register the two lines above in the Console, under your account's Customer Keys. Your company's Instances trust the key once the Console's next Customer Key List reaches them.");
     return 0;
   },
 };

@@ -18,7 +18,7 @@ import { ConnectorArtifactError, addSignature } from '../artifact';
 import type { AddedSignature } from '../artifact';
 import { KeyFileRefusal, readKeyFile } from './key-file';
 import type { LoadedKey } from './key-file';
-import { parseCommandArgs, plural, refused, requiredOption } from './io';
+import { parseCommandArgs, plural, refused, requiredOption, ui } from './io';
 import type { Command } from './io';
 
 export const sign: Command = {
@@ -59,11 +59,16 @@ export const sign: Command = {
 
     const { id, version } = added.opened.manifest;
     const named = key.name ? `key ${key.keyId} ("${key.name}")` : `key ${key.keyId}`;
-    io.out(
-      `Signed ${id} ${version} with ${named}${added.replaced ? ', replacing its earlier signature' : ''}: ${artifactArg}\n` +
-        `payload.sig carries ${plural(added.signedBy.length, 'signature', 'signatures')} ` +
-        `(${added.signedBy.join(', ')}). Payload ${added.opened.payloadSha256}, unchanged.`,
+    const out = ui(io);
+    out.success(
+      `Signed ${id} ${version} with ${named}${added.replaced ? ', replacing its earlier signature' : ''}: ${artifactArg}`,
     );
+    out.labels([
+      ['Signatures', `${plural(added.signedBy.length, 'signature', 'signatures')} in payload.sig (${added.signedBy.join(', ')})`],
+      ['Payload', `${added.opened.payloadSha256}, unchanged`],
+    ]);
+    out.text();
+    out.text("An admin of your company's Instance Adds it in the Studio's Connector Store.");
     return 0;
   },
 };
