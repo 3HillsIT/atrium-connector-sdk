@@ -18,7 +18,8 @@ import { BUILD_RECORD_FILE, GUIDE_DIRECTORY, RESERVED_CONNECTOR_IDS } from '../b
 import type { RuleName } from '../build';
 import { CONNECTION_AUTH_TYPES, CONNECTOR_ID_PATTERN } from '../artifact';
 import type { ConnectionAuthType } from '../artifact';
-import { guideLine, parseCommandArgs, refused } from './io';
+import { parseCommandArgs, printProblem, refused, ui, usageError } from './io';
+import { follow } from './output';
 import type { CliIO, Command } from './io';
 
 const SDK_ROOT = resolve(import.meta.dir, '..', '..');
@@ -141,9 +142,11 @@ export const init: Command = {
 
     const unanswered = QUESTIONS.filter((question) => typeof parsed.values[question.option] !== 'string');
     if (unanswered.length > 0 && !io.ask) {
-      io.err(
+      usageError(
+        init,
         `Missing ${unanswered.map((question) => `--${question.option}`).join(', ')}: with nobody at a ` +
-          `terminal to ask, init takes every answer as an option.\nusage: atrium-connector ${init.usage}`,
+          'terminal to ask, init takes every answer as an option.',
+        io,
       );
       return 2;
     }
@@ -160,11 +163,11 @@ export const init: Command = {
       while (answers[question.option] === undefined) {
         const answer = await io.ask!(question.prompt);
         if (answer === null) {
-          io.err('init stopped before every question had an answer. Nothing was written.');
+          ui(io).stderr.failure('init stopped before every question had an answer. Nothing was written.');
           return 2;
         }
         const read = question.read(answer);
-        if ('problem' in read) io.err(`${read.problem}\n${guideLine(read.rule)}`);
+        if ('problem' in read) printProblem(ui(io).stderr, read.rule, read.problem);
         else answers[question.option] = read.value;
       }
     }
@@ -174,7 +177,7 @@ export const init: Command = {
       displayName: answers['display-name']!,
       signIn: answers['sign-in'] as SignInKind,
     });
-    io.out(nextSteps(target, written, io));
+    printNextSteps(target, written, io);
     return 0;
   },
 };
@@ -256,24 +259,26 @@ function readJson(path: string): unknown {
   return JSON.parse(readFileSync(path, 'utf-8'));
 }
 
-function nextSteps(target: string, manifest: TemplateManifest, io: CliIO): string {
+function printNextSteps(target: string, manifest: TemplateManifest, io: CliIO): void {
+  const out = ui(io);
   // A short way there, or the whole path when the folder is somewhere else entirely.
   const fromHere = relative(io.cwd, target);
   const where = fromHere.startsWith('..') ? target : fromHere;
   const reads = manifest.actions.filter((action) => action.write !== true).map((action) => action.name);
   const writes = manifest.actions.filter((action) => action.write === true).map((action) => action.name);
-  return [
-    `Wrote the Connector ${manifest.id} ("${manifest.displayName}") to ${target}.`,
+  out.success(`Wrote the Connector ${manifest.id} ("${manifest.displayName}") to ${target}.`);
+  out.text(
     `Its example Actions, to replace with your system's own: ${reads.join(', ')} reads, ${writes.join(', ')} writes. ` +
       `${BUILD_RECORD_FILE} is its empty build record; commit it.`,
-    '',
-    'Next steps:',
-    ...(where ? [`  cd ${where}`] : []),
-    '  bun install',
-    '  bun test',
-    '  bunx atrium-connector check',
-    '',
-    `The docs are in ${GUIDE_DIRECTORY}/ (after bun install). Start with concepts.md.`,
-    'AGENTS.md gives a coding agent the commands and the rules.',
-  ].join('\n');
+  );
+  out.text();
+  out.text('Next steps:');
+  if (where) out.command(`cd ${where}`);
+  out.command('bun install');
+  out.command('bun test');
+  out.command('bunx atrium-connector check');
+  out.text();
+  out.text(['The docs are in ', follow(`${GUIDE_DIRECTORY}/`), ' (after bun install). Start with concepts.md.']);
+  out.text(['To read them in your browser: ', follow('bunx atrium-connector docs')]);
+  out.text('AGENTS.md gives a coding agent the commands and the rules.');
 }

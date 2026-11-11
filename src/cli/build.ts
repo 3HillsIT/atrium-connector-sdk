@@ -22,7 +22,7 @@ import {
   writeBuildRecord,
 } from '../build';
 import type { BuildRecord, ConnectorSource } from '../build';
-import { parseCommandArgs, refusedFailures } from './io';
+import { parseCommandArgs, refusedFailures, ui } from './io';
 import type { Command } from './io';
 
 /** Where `build` writes the Artifact, relative to the Connector repo. */
@@ -36,6 +36,8 @@ export const build: Command = {
     const parsed = parseCommandArgs(build, args, { try: { type: 'boolean' } }, io);
     if (!parsed) return 2;
     const tryVersion = parsed.values.try === true;
+    const out = ui(io);
+    out.step(tryVersion ? 'Building the next try version of the Connector' : 'Building the Connector');
 
     // The source once, for the version to build; checkConnector takes it as
     // read, and refuses a version that isn't a plain X.Y.Z.
@@ -52,7 +54,7 @@ export const build: Command = {
 
     const builtAt = io.now().toISOString();
     const report = await checkConnector(io.cwd, { source, version, publishedAt: builtAt });
-    if (report.connectorApiVersion !== undefined) io.out(bundleContractLine(report.connectorApiVersion));
+    if (report.connectorApiVersion !== undefined) out.text(bundleContractLine(report.connectorApiVersion));
     if (report.failures.length > 0) return refusedFailures('build', report.failures, io);
     const unsigned = report.unsigned!;
     const { id } = report.built!.manifest;
@@ -63,8 +65,8 @@ export const build: Command = {
       builtAt,
     });
     if (previous && previous.payloadSha256 !== unsigned.payloadSha256) {
-      io.err(
-        `Warning: ${BUILD_RECORD_FILE} has ${id} ${version} built on ${previous.builtAt} with payload ` +
+      out.stderr.warning(
+        `${BUILD_RECORD_FILE} has ${id} ${version} built on ${previous.builtAt} with payload ` +
           `${previous.payloadSha256}; this build's payload is ${unsigned.payloadSha256}. ` +
           `An Instance that already has ${version} refuses these bytes under the same version: ` +
           'use build --try, or bump the version, for one that does.',
@@ -76,12 +78,15 @@ export const build: Command = {
     writeFileSync(join(outDir, unsigned.fileName), unsigned.bytes);
     if (updated !== record) writeBuildRecord(io.cwd, updated);
 
-    io.out(
-      `Built ${id} ${version}, unsigned: ${OUTPUT_DIRECTORY}/${unsigned.fileName}\n` +
-        `Payload ${unsigned.payloadSha256}, recorded in ${BUILD_RECORD_FILE}. ` +
-        'An Instance Adds it once it is signed: ' +
-        `atrium-connector sign --key <key file> ${OUTPUT_DIRECTORY}/${unsigned.fileName}`,
-    );
+    const file = `${OUTPUT_DIRECTORY}/${unsigned.fileName}`;
+    out.success(`Built ${id} ${version}, unsigned: ${file}`);
+    out.labels([
+      ['Payload', unsigned.payloadSha256],
+      ['Recorded', BUILD_RECORD_FILE],
+    ]);
+    out.text();
+    out.text('An Instance Adds it once it is signed. Sign it with your Customer Key:');
+    out.command(`bunx atrium-connector sign --key <key file> ${file}`);
     return 0;
   },
 };

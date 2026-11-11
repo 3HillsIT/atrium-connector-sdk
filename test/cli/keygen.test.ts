@@ -81,7 +81,7 @@ describe('keygen', () => {
     // The most important sentence stands first and alone; the rest is short paragraphs.
     const paragraphs = run.stderr.trimEnd().split('\n\n');
     expect(paragraphs[0]).toBe(
-      'This file is the only copy of the private key. Keep it somewhere safe; a password manager is one option.',
+      '! This file is the only copy of the private key. Keep it somewhere safe; a password manager is one option.',
     );
     expect(paragraphs.length).toBe(5);
     expect(run.stderr).toContain(`Wrote the key "CI pipeline" (key ${file.keyId}) to ${out}, mode 600.`);
@@ -110,7 +110,7 @@ describe('keygen', () => {
     expect(run.exitCode).toBe(1);
     expect(run.stdout).toBe('');
     expect(run.stderr).toBe(
-      `keygen failed: ${out} already exists. keygen never overwrites a key file. Nothing was written.\n` +
+      `✗ keygen failed: ${out} already exists. keygen never overwrites a key file. Nothing was written.\n` +
         '  Guide: node_modules/@3hillsit/atrium-connector-sdk/docs/build-and-sign.md\n',
     );
     expect(readFileSync(out, 'utf8')).toBe('kept');
@@ -120,7 +120,7 @@ describe('keygen', () => {
     for (const name of ['x'.repeat(81), 'two\nlines']) {
       const run = await runCommand(dir, 'keygen', '--name', name, '--out', 'key.json');
       expect(run.exitCode).toBe(1);
-      expect(run.stderr).toStartWith('keygen failed: ');
+      expect(run.stderr).toStartWith('✗ keygen failed: ');
       expect(existsSync(join(dir, 'key.json'))).toBe(false);
     }
   });

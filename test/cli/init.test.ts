@@ -65,6 +65,7 @@ describe('init writes a repo that passes its own tests and check', () => {
         expect(run.stdout).toContain(`Wrote the Connector acme-tasks ("Acme Tasks") to ${join(dir, 'acme')}.`);
         expect(run.stdout).toContain('Next steps:\n  cd acme\n  bun install\n  bun test\n  bunx atrium-connector check');
         expect(run.stdout).toContain('The docs are in node_modules/@3hillsit/atrium-connector-sdk/docs/');
+        expect(run.stdout).toContain('bunx atrium-connector docs');
 
         const repo = join(dir, 'acme');
         const manifest = readJson('acme/manifest.json');

@@ -118,7 +118,10 @@ export interface CommandRun {
 
 /** `bun bin/atrium-connector.ts <args…>` in `cwd`, as a developer runs `bunx atrium-connector`. */
 export async function runCommand(cwd: string, ...args: string[]): Promise<CommandRun> {
-  const proc = Bun.spawn(['bun', BIN, ...args], { cwd, stdout: 'pipe', stderr: 'pipe' });
+  // Plain UTF-8 output whatever the machine running the tests sets: glyphs, no colour.
+  const { NO_COLOR: _a, FORCE_COLOR: _b, TERM: _c, LC_ALL: _d, LC_CTYPE: _e, ...rest } = process.env;
+  const env = { ...rest, LANG: 'en_US.UTF-8' };
+  const proc = Bun.spawn(['bun', BIN, ...args], { cwd, env, stdout: 'pipe', stderr: 'pipe' });
   const [stdout, stderr, exitCode] = await Promise.all([
     new Response(proc.stdout).text(),
     new Response(proc.stderr).text(),

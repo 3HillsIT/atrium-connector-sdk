@@ -98,10 +98,12 @@ describe('sign', () => {
         parseSignatureFile(before.signature, { allowUnsigned: true }).blobBytes,
       );
       expect(run.stdout).toBe(
-        `Signed thing-connector 1.2.0 with key ${key.keyId} ("CI pipeline"): dist/${fileName}\n` +
-          `payload.sig carries 1 signature (${key.keyId}). Payload ${opened.payloadSha256}, unchanged.\n`,
+        `✓ Signed thing-connector 1.2.0 with key ${key.keyId} ("CI pipeline"): dist/${fileName}\n` +
+          `  Signatures  1 signature in payload.sig (${key.keyId})\n` +
+          `  Payload     ${opened.payloadSha256}, unchanged\n\n` +
+          "An admin of your company's Instance Adds it in the Studio's Connector Store.\n",
       );
-      expect(built.stdout).toContain(`atrium-connector sign --key <key file> dist/${fileName}`);
+      expect(built.stdout).toContain(`  bunx atrium-connector sign --key <key file> dist/${fileName}`);
     } finally {
       repo.remove();
     }
@@ -117,7 +119,7 @@ describe('sign', () => {
     const run = await sign(consoleKeyFile(second, 'second.json'), artifactPath);
 
     expect(run.exitCode).toBe(0);
-    expect(run.stdout).toContain(`payload.sig carries 2 signatures (${first.keyId}, ${second.keyId}).`);
+    expect(run.stdout).toContain(`2 signatures in payload.sig (${first.keyId}, ${second.keyId})`);
     const bytes = read(artifactPath);
     expect(await sha256Hex(readEnvelope(bytes).payload)).toBe(payloadSha256);
     expect((await openArtifact(bytes, [...first.ring, ...second.ring])).keyIds).toEqual([first.keyId, second.keyId]);
@@ -189,7 +191,7 @@ describe('sign', () => {
       const path = keyFile('key.json', { ...key, ring: undefined, keyId: other.keyId });
 
       expect(await refusal(path)).toBe(
-        `sign failed: The key file at ${path} claims key id ${other.keyId}, but its public half derives ` +
+        `✗ sign failed: The key file at ${path} claims key id ${other.keyId}, but its public half derives ` +
           `${key.keyId}. Nothing was written.\n` +
           '  Guide: node_modules/@3hillsit/atrium-connector-sdk/docs/build-and-sign.md\n',
       );
@@ -230,7 +232,7 @@ describe('sign', () => {
       const path = keyFile('key.json', { keyId: key.keyId, privateKey: other.privateKey, publicKey: key.publicKey });
 
       expect(await refusal(path)).toBe(
-        `sign failed: The signature made with key ${key.keyId} does not verify with that key's public half: ` +
+        `✗ sign failed: The signature made with key ${key.keyId} does not verify with that key's public half: ` +
           `the private half belongs to another key. Check the key file at ${path}. Nothing was written.\n` +
           '  Guide: node_modules/@3hillsit/atrium-connector-sdk/docs/build-and-sign.md\n',
       );
