@@ -50,10 +50,13 @@ export const keygen: Command = {
 
     io.out(keygenPrintout(file).trimEnd());
     io.err(
-      `Wrote the key "${name}" (key ${file.keyId}) to ${outPath}, mode 600. Its private half signs ` +
-        'your Connectors: keep the file where your signing runs (a CI secret, say) and nowhere else.\n' +
-        "Register the two lines above in the Console, under your account's Customer Keys. Your " +
-        "company's Instances trust the key once the Console's next Customer Key List reaches them.",
+      [
+        'This file is the only copy of the private key. Keep it somewhere safe; a password manager is one option.',
+        `Wrote the key "${name}" (key ${file.keyId}) to ${outPath}, mode 600.`,
+        'Do not commit it. Delete any local copy where signing does not run (a CI secret, say, is the one place it is needed).',
+        'If it is lost, remove the key in the Console and make a new one.',
+        "Register the two lines above in the Console, under your account's Customer Keys. Your company's Instances trust the key once the Console's next Customer Key List reaches them.",
+      ].join('\n\n'),
     );
     return 0;
   },

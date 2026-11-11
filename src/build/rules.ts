@@ -64,9 +64,12 @@ export const RULES = {
 
 export type RuleName = keyof typeof RULES;
 
+/** Where an installed SDK keeps its guide, from the root of a Connector repo. */
+export const GUIDE_DIRECTORY = 'node_modules/@3hillsit/atrium-connector-sdk/docs';
+
 /** Where the guide page lives in a Connector repo with the SDK installed. */
 export function guidePagePath(page: GuidePage): string {
-  return `node_modules/@3hillsit/atrium-connector-sdk/docs/${page}.md`;
+  return `${GUIDE_DIRECTORY}/${page}.md`;
 }
 
 /**

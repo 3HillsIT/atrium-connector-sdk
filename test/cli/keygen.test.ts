@@ -78,6 +78,12 @@ describe('keygen', () => {
     expect(run.stdout).toBe(keygenPrintout(file));
     expect(run.stdout).not.toContain(file.privateKey);
     expect(run.stderr).not.toContain(file.privateKey);
+    // The most important sentence stands first and alone; the rest is short paragraphs.
+    const paragraphs = run.stderr.trimEnd().split('\n\n');
+    expect(paragraphs[0]).toBe(
+      'This file is the only copy of the private key. Keep it somewhere safe; a password manager is one option.',
+    );
+    expect(paragraphs.length).toBe(5);
     expect(run.stderr).toContain(`Wrote the key "CI pipeline" (key ${file.keyId}) to ${out}, mode 600.`);
   });
 

@@ -49,7 +49,7 @@ export { checkFormat } from './self-check';
 export type { FormatCheck } from './self-check';
 export { checkAuthoringRules, exportedActions, loadEntryModule } from './authoring';
 export type { ExportedAction } from './authoring';
-export { BuildRefusal, GUIDE_PAGES, RULES, failureOf, guidePagePath } from './rules';
+export { BuildRefusal, GUIDE_DIRECTORY, GUIDE_PAGES, RULES, failureOf, guidePagePath } from './rules';
 export type { CheckFailure, GuidePage, RuleName } from './rules';
 
 // ── The build record ────────────────────────────────────────────────────────
