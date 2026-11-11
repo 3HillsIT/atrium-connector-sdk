@@ -28,21 +28,37 @@ Run each in the Connector repo (the folder holding `package.json` and `manifest.
 | `bunx atrium-connector build --try` | The same, as the next try version of the manifest's version. |
 | `bunx atrium-connector sign --key <key file> <artifact>` | Adds the key's signature to the Artifact. Needs no source. |
 | `bunx atrium-connector keygen --name <name> --out <file>` | Makes a new signing key outside the browser. |
+| `bunx atrium-connector docs` | Opens these docs in your browser, as one page. |
 
-Every command exits `0` when it did what it says, `1` when it refused (each refusal names a page of this guide), and `2` for a usage error. `bunx atrium-connector help` lists them.
+Output on a terminal is coloured with the terminal's own colours; `NO_COLOR` turns that off, and a pipe or a CI log gets plain text. Every command exits `0` when it did what it says, `1` when it refused (each refusal names a page of this guide), and `2` for a usage error. `bunx atrium-connector help` lists them.
 
 ## init
 
 ```
 $ bunx -p @3hillsit/atrium-connector-sdk atrium-connector init acme-tasks
-Connector id (letters, digits, '.', '_' and '-'; it starts every Tool's name and never changes): acme-tasks
-Display name (what the Studio shows): Acme Tasks
+Connector id (letters, digits, '.', '_' and '-'). It is the first part of every Tool's name and never changes:
+  acme-tasks -> Tools named acme-tasks_search_issues
+Connector id: acme-tasks
+Display name. The Studio's Connector Store shows it, and you can change it later:
+  Acme Tasks
+Display name: Acme Tasks
 How does the system take its credential?
   1. pat          a token or API key, sent in one header
   2. multi-header a secret in one header, and settings from the Integration in others
   3. oauth2       Microsoft Entra ID, through the Instance's own Microsoft registration
 Sign-in kind (a name or 1-3): 1
-Wrote the Connector acme-tasks ("Acme Tasks") to /home/dev/acme-tasks.
+✓ Wrote the Connector acme-tasks ("Acme Tasks") to /home/dev/acme-tasks.
+Its example Actions, to replace with your system's own: list_items reads, create_item writes. atrium-builds.json is its empty build record; commit it.
+
+Next steps:
+  cd acme-tasks
+  bun install
+  bun test
+  bunx atrium-connector check
+
+The docs are in node_modules/@3hillsit/atrium-connector-sdk/docs/ (after bun install). Start with concepts.md.
+To read them in your browser: bunx atrium-connector docs
+AGENTS.md gives a coding agent the commands and the rules.
 ```
 
 `init` writes a Connector repo that passes its own tests and `check` before you change a line: `manifest.json` with your answers and an example `connection` block for the sign-in kind, one read and one write Action with their tests, the parity tests, `AGENTS.md` and `CLAUDE.md` for a coding agent, and an empty `atrium-builds.json`. Its `package.json` pins the SDK version that ran `init`. What each file is for is on [concepts.md](concepts.md#what-a-connector-repo-holds).
@@ -57,8 +73,9 @@ Then replace the example values in the `connection` block (its `_comment` says w
 
 ```
 $ bunx atrium-connector check
+==> Building the Connector and checking it as an Instance would
 Bundle Contract v1: accepted by every atrium Release.
-check passed: jira-dc 1.0.0, 4 actions. Nothing was written or signed.
+✓ check passed: jira-dc 1.0.0, 4 actions. Nothing was written or signed.
 ```
 
 In order, `check`:
@@ -74,10 +91,11 @@ It reports every problem it can find, not only the first, each with its rule and
 
 ```
 $ bunx atrium-connector check
+==> Building the Connector and checking it as an Instance would
 Bundle Contract v1: accepted by every atrium Release.
-write-flag: The action "create_issue" sends POST, and manifest.json doesn't say whether it changes anything. Add "write": true if it does, so its Tools wait for approval; add "write": false only if it just reads (a search sent as POST, say).
+✗ write-flag: The action "create_issue" sends POST, and manifest.json doesn't say whether it changes anything. Add "write": true if it does, so its Tools wait for approval; add "write": false only if it just reads (a search sent as POST, say).
   Guide: node_modules/@3hillsit/atrium-connector-sdk/docs/rules.md
-check failed: 1 problem. Nothing was written or signed.
+✗ check failed: 1 problem. Nothing was written or signed.
 ```
 
 Run it as often as you like, and before you call a change done.
@@ -86,9 +104,14 @@ Run it as often as you like, and before you call a change done.
 
 ```
 $ bunx atrium-connector build
+==> Building the Connector
 Bundle Contract v1: accepted by every atrium Release.
-Built jira-dc 1.0.0, unsigned: dist/jira-dc-1.0.0.atrium.tar.gz
-Payload 025dbf4c…, recorded in atrium-builds.json. An Instance Adds it once it is signed: atrium-connector sign --key <key file> dist/jira-dc-1.0.0.atrium.tar.gz
+✓ Built jira-dc 1.0.0, unsigned: dist/jira-dc-1.0.0.atrium.tar.gz
+  Payload   025dbf4c…
+  Recorded  atrium-builds.json
+
+An Instance Adds it once it is signed. Sign it with your Customer Key:
+  bunx atrium-connector sign --key <key file> dist/jira-dc-1.0.0.atrium.tar.gz
 ```
 
 `build` runs everything `check` does and stops the same way on a problem. When the Connector passes, it writes `dist/<id>-<version>.atrium.tar.gz`. The file is unsigned: an Instance refuses it until it is signed. Keep `dist/` out of git.
@@ -113,7 +136,7 @@ The payload is deterministic: the same source, lockfile and Bun give the same pa
 When `build` makes a version the record already has with a different payload, it warns, naming both digests, and builds anyway. The record keeps the first digest, so every later build that differs from it warns again:
 
 ```
-Warning: atrium-builds.json has jira-dc 1.0.0 built on 2026-11-05T22:20:51.075Z with payload 025dbf4c…; this build's payload is 786210c1…. An Instance that already has 1.0.0 refuses these bytes under the same version: use build --try, or bump the version, for one that does.
+! atrium-builds.json has jira-dc 1.0.0 built on 2026-11-05T22:20:51.075Z with payload 025dbf4c…; this build's payload is 786210c1…. An Instance that already has 1.0.0 refuses these bytes under the same version: use build --try, or bump the version, for one that does.
 ```
 
 It doesn't refuse, because you may be rebuilding for a test Instance that never saw the first build. But **one version is one set of bytes**: an Instance that has `1.0.0` refuses another `1.0.0`. Before such a build leaves your machine, raise the version or build a try.
@@ -136,8 +159,11 @@ Each try is a full Artifact. Sign it and Add it on a test Instance like any vers
 
 ```
 $ bunx atrium-connector sign --key ~/keys/acme-5edf8f879585b497.atrium-key.json dist/jira-dc-1.0.0.atrium.tar.gz
-Signed jira-dc 1.0.0 with key 5edf8f879585b497 ("CI pipeline"): dist/jira-dc-1.0.0.atrium.tar.gz
-payload.sig carries 1 signature (5edf8f879585b497). Payload 025dbf4c…, unchanged.
+✓ Signed jira-dc 1.0.0 with key 5edf8f879585b497 ("CI pipeline"): dist/jira-dc-1.0.0.atrium.tar.gz
+  Signatures  1 signature in payload.sig (5edf8f879585b497)
+  Payload     025dbf4c…, unchanged
+
+An admin of your company's Instance Adds it in the Studio's Connector Store.
 ```
 
 `sign` adds one signature, made with the key file's private half, to the Artifact. The payload and the version stay the same bytes, so the payload digest an Instance records is the one `build` printed.
@@ -172,7 +198,15 @@ For a key that should never pass through a browser, such as one a CI secret stor
 
 ```
 $ bunx atrium-connector keygen --name "CI pipeline" --out ci-pipeline.atrium-key.json > ci-pipeline.pub
-Wrote the key "CI pipeline" (key 5edf8f879585b497) to /home/dev/ci-pipeline.atrium-key.json, mode 600. …
+! This file is the only copy of the private key. Keep it somewhere safe; a password manager is one option.
+
+✓ Wrote the key "CI pipeline" (key 5edf8f879585b497) to /home/dev/ci-pipeline.atrium-key.json, mode 600.
+
+Do not commit it. Delete any local copy where signing does not run (a CI secret, say, is the one place it is needed).
+
+If it is lost, remove the key in the Console and make a new one.
+
+Register the two lines above in the Console, under your account's Customer Keys. Your company's Instances trust the key once the Console's next Customer Key List reaches them.
 $ cat ci-pipeline.pub
 key-id 5edf8f879585b497
 public-key MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE…

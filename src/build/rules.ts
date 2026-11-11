@@ -9,6 +9,7 @@
 
 /** The developer guide's pages, as file names under the package's docs/ without `.md`. */
 export const GUIDE_PAGES = [
+  'tutorial',
   'concepts',
   'manifest',
   'actions',

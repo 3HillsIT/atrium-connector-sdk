@@ -44,6 +44,6 @@ Pages in `node_modules/@3hillsit/atrium-connector-sdk/docs/`:
 | build, or set up CI | `build-and-sign.md` |
 | raise a version or update the SDK | `versions.md` |
 | fix a refusal from a command or from the Studio | the page the refusal names, else `troubleshooting.md` |
-| build a new Connector with the person, step by step | `guided-build.md` |
+| build a new Connector with the person, step by step | `guided-build.md` (the person can also follow `tutorial.md` alone; it has the same steps) |
 
 The two Actions in `src/actions/` and their tests are examples: replace them with the system's own.

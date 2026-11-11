@@ -10,6 +10,8 @@ It needs [Bun](https://bun.sh). It is MIT-licensed ([LICENSE](LICENSE)).
 
 ## Quick start
 
+New to this? The [tutorial](docs/tutorial.md) takes you through every step below with what to expect and what to do when it fails. A coding agent follows the [guided build](docs/guided-build.md) instead, with you.
+
 0. Start a Connector repo in a new folder:
 
    ```
@@ -29,10 +31,11 @@ It needs [Bun](https://bun.sh). It is MIT-licensed ([LICENSE](LICENSE)).
 
 ## The guide
 
-One page per topic, in `docs/`. The same pages ship inside the package, in `node_modules/@3hillsit/atrium-connector-sdk/docs/`, so they describe exactly the version you installed.
+One page per topic, in `docs/`. The same pages ship inside the package, in `node_modules/@3hillsit/atrium-connector-sdk/docs/`, so they describe exactly the version you installed. `bunx atrium-connector docs` opens them in your browser as one page.
 
 | Page | Read it before you… |
 |---|---|
+| [tutorial](docs/tutorial.md) | start here: a walk from an empty folder to a Connector an admin can Add, step by step, no AI tools needed |
 | [concepts](docs/concepts.md) | start: Connector, Action, Tool, Integration, and what atrium reads and runs |
 | [manifest](docs/manifest.md) | touch `manifest.json` or its `connection` block |
 | [actions](docs/actions.md) | write an Action |
@@ -41,7 +44,7 @@ One page per topic, in `docs/`. The same pages ship inside the package, in `node
 | [build-and-sign](docs/build-and-sign.md) | build, sign, make a key or set up CI |
 | [versions](docs/versions.md) | release a version, update the SDK or update atrium |
 | [troubleshooting](docs/troubleshooting.md) | fix a refusal from a command or from the Studio |
-| [guided-build](docs/guided-build.md) | build a new Connector with a coding agent |
+| [guided-build](docs/guided-build.md) | build a new Connector with a coding agent (it explains, proposes and asks; signing stays yours) |
 
 Every refusal from `init`, `check`, `build`, `sign` and `keygen` names the page that explains it.
 
