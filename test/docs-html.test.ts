@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { existsSync, readFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { GUIDE_PAGES } from '../src/build';
-import { DOCS_HTML_FILE, DOCS_HTML_PATH, buildDocsHtml, readPages } from '../src/cli/docs-html';
+import { DOCS_HTML_FILE, DOCS_HTML_PATH, NAV_GROUPS, buildDocsHtml, readPages } from '../src/cli/docs-html';
 import { runCommand } from './support/connector-repo';
 
 // The docs as one HTML file: it holds every page of docs/*.md, its links
@@ -37,6 +37,14 @@ describe('the docs as one HTML file', () => {
     expect(marks.length).toBeGreaterThan(GUIDE_PAGES.length);
     for (const mark of marks) expect({ mark, found: ids.has(mark) }).toEqual({ mark, found: true });
     expect(html).not.toMatch(/href="[a-z-]+\.md/);
+  });
+
+  test('the list on the left puts every page in exactly one group, and the page says where to start', () => {
+    const listed = NAV_GROUPS.flatMap((group) => group.pages.map((p) => p.page));
+    expect([...listed].sort()).toEqual([...GUIDE_PAGES].sort());
+    expect(NAV_GROUPS[0]!.pages[0]!.page).toBe('tutorial');
+    expect(html).toContain('<h1>How to use these docs</h1>');
+    expect(html).toContain('Read the first page');
   });
 
   test('ids are unique, so two pages with one heading never clash', () => {

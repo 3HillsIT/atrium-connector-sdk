@@ -10,6 +10,12 @@ The SDK follows semantic versioning from 1.0.0:
 
 Versions before 1.0.0, the `1.0.0-beta.N` pre-releases included, make no promise.
 
+## 1.1.1
+
+The HTML docs say which page is for what (#11226). Nothing in the authoring API, an option, an exit code or an output file changes.
+
+- **The list on the left is grouped,** with a line under each page: "Start here" (the tutorial, which is read first and top to bottom, and concepts, read once), "Look it up when you need it" (the reference pages) and "Only if a coding agent builds with you" (the guided build). The file opens on a short "How to use these docs": new readers take the tutorial, the other pages are opened when a step or a refusal sends you there. A test holds that every page is in exactly one group.
+
 ## 1.1.0
 
 A better first hour for a developer who has never built a Connector (#11226). Nothing in the authoring API or in an option, exit code or output file changes. Everything here assumes no AI tooling: AI is an optional way to build, never a prerequisite.
