@@ -4,11 +4,22 @@
 
 The SDK follows semantic versioning from 1.0.0:
 
-- **Breaking changes come only in a new major,** with migration steps in its entry here. That covers the authoring API (what `@3hillsit/atrium-connector-sdk` and `@3hillsit/atrium-connector-sdk/client` export) and the `atrium-connector` commands (`init`, `check`, `build`, `sign`, `keygen`): their options, their output files and their exit codes. `@3hillsit/atrium-connector-sdk/artifact` and `@3hillsit/atrium-connector-sdk/build` are for atrium's own tools and are not covered.
+- **Breaking changes come only in a new major,** with migration steps in its entry here. That covers the authoring API (what `@3hillsit/atrium-connector-sdk` and `@3hillsit/atrium-connector-sdk/client` export) and the `atrium-connector` commands (`init`, `check`, `build`, `sign`, `keygen`, `docs`): their options, their output files and their exit codes. `@3hillsit/atrium-connector-sdk/artifact` and `@3hillsit/atrium-connector-sdk/build` are for atrium's own tools and are not covered.
 - **Fixes land on the newest major only.**
 - **The SDK's version plays no part in what an Instance accepts.** Only the Bundle Contract version (`CURRENT_CONNECTOR_API_VERSION`) does, and the SDK is inlined into every bundle, so a Connector built with an older SDK major keeps running for as long as atrium accepts its Bundle Contract version.
 
 Versions before 1.0.0, the `1.0.0-beta.N` pre-releases included, make no promise.
+
+## 1.1.0
+
+A better first hour for a developer who has never built a Connector (#11226). Nothing in the authoring API or in an option, exit code or output file changes. Everything here assumes no AI tooling: AI is an optional way to build, never a prerequisite.
+
+- **`docs/tutorial.md`, new, first in the README's table:** a linear walk from "what you need" (Bun, an empty folder) through `init`, the manifest, an Action, its test, `check`, `build --try`, a key and `sign`, to Added in the Studio. Each step gives the command, the result to expect and what to do when it fails.
+- **`docs/guided-build.md` is now the procedure for a coding agent that builds with a person** (it was a stub): the same steps as the tutorial, with the agent explaining, proposing and asking, checking after every step, and never signing, making a key or touching an Instance. The generated `build-connector` skill and `AGENTS.md` point at it.
+- **`atrium-connector docs`, new:** opens the docs in your browser as one HTML file, generated from `docs/*.md` when the package is packed (`prepack`) and shipped as `atrium-connector-docs.html`. It stands alone and follows the system's light or dark theme; links between pages become jump marks. `--print` prints where the file is. A test builds the file from the Markdown again and checks the shipped one against it.
+- **The commands print like the atrium CLI** (Brand v2): `==>` steps, `✓ ✗ !` glyphs (`ok x !` outside a UTF-8 locale), the terminal's own colours on glyphs only and cyan for what you can run or open, plain text in a pipe or CI log, `NO_COLOR`, `TERM=dumb` and `FORCE_COLOR` honoured. Exit codes (0, 1, 2) and `keygen`'s standard output (the two lines the Console registers) are unchanged. What did change, for anything that reads the text: refusals start with `✗`, `build`'s digest warning starts with `!` instead of `Warning:`, `sign` and `build` print their facts as labelled lines, and the help wraps at 80 columns.
+- **`init` explains what it asks:** the Connector id's question gives an example and its consequence (`acme-tasks` makes Tools named `acme-tasks_search_issues`), the display name's says where it shows. It ends with "Next steps", where the docs are (`node_modules/@3hillsit/atrium-connector-sdk/docs/`) and `atrium-connector docs`. The repo it writes has a `README.md`, and its `AGENTS.md` points at the docs.
+- **`keygen`'s notice on standard error is short paragraphs,** the one that matters first and alone: the file is the only copy of the private key; a password manager is a suggestion, not a requirement. Then: don't commit it, delete local copies where signing doesn't run, and if it is lost remove the key and make a new one.
 
 ## 1.0.0
 
