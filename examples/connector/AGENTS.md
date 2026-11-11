@@ -1,6 +1,6 @@
 # A Connector for atrium
 
-This repo is an atrium Connector: Actions written as TypeScript handlers with `@3hillsit/atrium-connector-sdk`. atrium reads `manifest.json` to learn each Tool, and runs the handlers with a `ctx` whose broker holds the credentials and makes the HTTP calls. The SDK's guide is in `node_modules/@3hillsit/atrium-connector-sdk/docs/` (after `bun install`), and describes exactly the SDK installed here.
+This repo is an atrium Connector: Actions written as TypeScript handlers with `@3hillsit/atrium-connector-sdk`. atrium reads `manifest.json` to learn each Tool, and runs the handlers with a `ctx` whose broker holds the credentials and makes the HTTP calls. The SDK's guide is in `node_modules/@3hillsit/atrium-connector-sdk/docs/` (after `bun install`), and describes exactly the SDK installed here. Start with `concepts.md`.
 
 ## Commands
 

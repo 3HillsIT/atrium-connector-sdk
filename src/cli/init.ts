@@ -14,7 +14,7 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, relative, resolve } from 'path';
-import { BUILD_RECORD_FILE, RESERVED_CONNECTOR_IDS, guidePagePath } from '../build';
+import { BUILD_RECORD_FILE, GUIDE_DIRECTORY, RESERVED_CONNECTOR_IDS } from '../build';
 import type { RuleName } from '../build';
 import { CONNECTION_AUTH_TYPES, CONNECTOR_ID_PATTERN } from '../artifact';
 import type { ConnectionAuthType } from '../artifact';
@@ -67,7 +67,10 @@ const SIGN_IN_LIST = CONNECTION_AUTH_TYPES.map(
 const QUESTIONS: Question[] = [
   {
     option: 'id',
-    prompt: "Connector id (letters, digits, '.', '_' and '-'; it starts every Tool's name and never changes):",
+    prompt:
+      "Connector id (letters, digits, '.', '_' and '-'). It is the first part of every Tool's name and never changes:\n" +
+      '  acme-tasks -> Tools named acme-tasks_search_issues\n' +
+      'Connector id:',
     read(answer) {
       const id = answer.trim();
       if (!id) return { rule: 'manifest', problem: 'Give the Connector an id, for example "acme-tasks".' };
@@ -87,7 +90,9 @@ const QUESTIONS: Question[] = [
   },
   {
     option: 'display-name',
-    prompt: 'Display name (what the Studio shows):',
+    prompt:
+      "Display name. The Studio's Connector Store shows it, and you can change it later:\n" +
+      '  Acme Tasks\nDisplay name:',
     read(answer) {
       const name = answer.trim();
       if (!name) return { rule: 'manifest', problem: 'Give the Connector a display name, for example "Acme Tasks".' };
@@ -262,12 +267,13 @@ function nextSteps(target: string, manifest: TemplateManifest, io: CliIO): strin
     `Its example Actions, to replace with your system's own: ${reads.join(', ')} reads, ${writes.join(', ')} writes. ` +
       `${BUILD_RECORD_FILE} is its empty build record; commit it.`,
     '',
-    'Next:',
+    'Next steps:',
     ...(where ? [`  cd ${where}`] : []),
     '  bun install',
     '  bun test',
     '  bunx atrium-connector check',
     '',
-    `AGENTS.md gives a coding agent the commands and the rules. The guide: ${guidePagePath('concepts')}, and the pages beside it.`,
+    `The docs are in ${GUIDE_DIRECTORY}/ (after bun install). Start with concepts.md.`,
+    'AGENTS.md gives a coding agent the commands and the rules.',
   ].join('\n');
 }

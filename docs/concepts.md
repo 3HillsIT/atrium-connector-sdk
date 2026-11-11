@@ -55,6 +55,7 @@ src/actions/*.ts    one defineAction each (actions.md)
 test/               bun tests: one file per Action, and the parity tests (testing.md)
 atrium-builds.json  the build record, committed (build-and-sign.md)
 dist/               the Artifacts build writes; .gitignore leaves it out of git
+README.md           where the docs are and the first commands
 AGENTS.md           for a coding agent: the commands, the rules, which page to read first
 CLAUDE.md           "@AGENTS.md", so Claude Code reads the same
 .claude/skills/build-connector/   the guided build as a Claude Code skill (guided-build.md)

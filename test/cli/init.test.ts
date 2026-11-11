@@ -63,7 +63,8 @@ describe('init writes a repo that passes its own tests and check', () => {
         expect(run.stderr).toBe('');
         expect(run.exitCode).toBe(0);
         expect(run.stdout).toContain(`Wrote the Connector acme-tasks ("Acme Tasks") to ${join(dir, 'acme')}.`);
-        expect(run.stdout).toContain('  cd acme\n  bun install\n  bun test\n  bunx atrium-connector check');
+        expect(run.stdout).toContain('Next steps:\n  cd acme\n  bun install\n  bun test\n  bunx atrium-connector check');
+        expect(run.stdout).toContain('The docs are in node_modules/@3hillsit/atrium-connector-sdk/docs/');
 
         const repo = join(dir, 'acme');
         const manifest = readJson('acme/manifest.json');
@@ -110,6 +111,7 @@ describe('what the repo holds', () => {
     await runCommand(dir, 'init', '--id', 'acme', '--display-name', 'Acme', '--sign-in', 'pat');
 
     expect(read('CLAUDE.md')).toBe('@AGENTS.md\n');
+    expect(read('README.md')).toContain('node_modules/@3hillsit/atrium-connector-sdk/docs/');
     const agents = read('AGENTS.md');
     expect(agents).toContain('Never run `atrium-connector sign`');
     for (const page of GUIDE_PAGES) {
