@@ -1,6 +1,6 @@
 {
   "name": "@3hillsit/atrium-connector-sdk",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Build, check and sign Connectors for atrium. The handler never holds a credential: atrium's broker makes the calls.",
   "license": "MIT",
   "repository": {

@@ -48,13 +48,58 @@ export function renderPage(page: GuidePage, markdown: string): DocsPage {
   return { page, title, html };
 }
 
+/**
+ * How the pages are offered: where to start, what to look up, and what is for
+ * a coding agent. Every page is in exactly one group (test/docs-html.test.ts),
+ * so a new page can't be left out of the list a reader sees.
+ */
+export const NAV_GROUPS: ReadonlyArray<{
+  heading: string;
+  pages: ReadonlyArray<{ page: GuidePage; about: string }>;
+}> = [
+  {
+    heading: 'Start here',
+    pages: [
+      { page: 'tutorial', about: 'Read this first, top to bottom. It takes you from an empty folder to a signed Connector.' },
+      { page: 'concepts', about: 'The words (Instance, Tool, Integration) and what happens to your code. Read once.' },
+    ],
+  },
+  {
+    heading: 'Look it up when you need it',
+    pages: [
+      { page: 'manifest', about: 'Every field of manifest.json and its connection block.' },
+      { page: 'actions', about: 'How to write an Action, and what ctx gives it.' },
+      { page: 'rules', about: 'The rules that break a Connector. Read before you ship.' },
+      { page: 'testing', about: 'Testing an Action without a real system.' },
+      { page: 'build-and-sign', about: 'The commands, keys, signing, CI, and getting to Added.' },
+      { page: 'versions', about: 'Versions, try versions, updates, and what atrium promises.' },
+      { page: 'troubleshooting', about: 'What each refusal means and what to do.' },
+    ],
+  },
+  {
+    heading: 'Only if a coding agent builds with you',
+    pages: [{ page: 'guided-build', about: 'The procedure the agent follows. You do not need it to build by hand.' }],
+  },
+];
+
 export function readPages(docsDirectory = join(SDK_ROOT, 'docs')): DocsPage[] {
   return GUIDE_PAGES.map((page) => renderPage(page, readFileSync(join(docsDirectory, `${page}.md`), 'utf-8')));
 }
 
 /** The whole document, from the pages. The same pages give the same bytes. */
 export function buildDocsHtml(pages: DocsPage[] = readPages(), version = sdkVersion()): string {
-  const nav = pages.map((p) => `<li><a href="#${p.page}">${escapeHtml(p.title)}</a></li>`).join('\n');
+  const byPage = new Map(pages.map((p) => [p.page, p]));
+  const nav = NAV_GROUPS.map(
+    (group) =>
+      `<li class="group"><span class="group-name">${escapeHtml(group.heading)}</span><ol>\n` +
+      group.pages
+        .map(({ page, about }) => {
+          const title = byPage.get(page)?.title ?? page;
+          return `<li><a href="#${page}">${escapeHtml(title)}</a><span class="about">${escapeHtml(about)}</span></li>`;
+        })
+        .join('\n') +
+      '\n</ol></li>',
+  ).join('\n');
   const sections = pages.map((p) => `<section id="${p.page}">\n${p.html}</section>`).join('\n');
   return `<!doctype html>
 <html lang="en">
@@ -70,10 +115,15 @@ export function buildDocsHtml(pages: DocsPage[] = readPages(), version = sdkVers
 <button type="button" id="theme" aria-label="Switch between light and dark">Light / dark</button>
 </header>
 <div class="layout">
-<nav aria-label="Pages"><ol>
+<nav aria-label="Pages"><ol class="groups">
 ${nav}
 </ol></nav>
 <main>
+<section id="how-to-use" class="intro">
+<h1>How to use these docs</h1>
+<p><strong>New to this? Read the first page, <a href="#tutorial">Build your first Connector</a>, from top to bottom.</strong> It is a complete walk from an empty folder to a signed Connector an admin can Add, and it tells you at each step which other page to open if you need more.</p>
+<p>The other pages are reference. You do not read them in order: open one when a step or a command's refusal sends you there, or when you want to know more. <a href="#concepts">Concepts</a> is the one worth reading once, early. <a href="#rules">The rules that break a Connector</a> is worth reading before you ship anything that writes. <a href="#guided-build">The guided build</a> is for a coding agent working with you; building by hand, you can skip it.</p>
+</section>
 ${sections}
 </main>
 </div>
@@ -131,6 +181,10 @@ button { font: 500 14px var(--sans); color: var(--text); background: var(--raise
 .layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 32px; max-width: 1120px; margin: 0 auto; padding: 24px 16px 96px; }
 nav { position: sticky; top: 64px; align-self: start; }
 nav ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+nav .groups { gap: 20px; }
+.group-name { display: block; padding: 0 8px 4px; color: var(--muted); font: 500 12px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; }
+nav .about { display: block; padding: 0 8px 6px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.intro { background: var(--surface); border: 1px solid var(--hairline); border-radius: 8px; padding: 8px 24px; }
 nav a { display: block; padding: 4px 8px; border-radius: 4px; text-decoration: none; color: var(--text); }
 nav a:hover { background: var(--raised); }
 main { min-width: 0; max-width: 78ch; }
@@ -152,7 +206,7 @@ blockquote { margin: 0 0 16px; padding: 4px 16px; border-left: 3px solid var(--h
 @media (max-width: 800px) {
   .layout { grid-template-columns: minmax(0, 1fr); }
   nav { position: static; }
-  nav ol { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  nav .about { display: none; }
 }
 `;
 
