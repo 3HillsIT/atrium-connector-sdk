@@ -1,6 +1,6 @@
 # Tools generated from the system
 
-An ordinary Connector's Tools are fixed: one per Action in `manifest.json`, the same for every customer. Some systems differ per customer: one has entities of its own (an event booking, a custom project type) that no Connector version can know about in advance. For those, a Connector can let the system say what exists and have atrium make Tools from the answer, per Workspace. Read this page before you build such a Connector.
+An ordinary Connector's Tools are fixed: one per Action in `manifest.json`, the same for every customer. Some systems differ per customer: one has entities of its own (an event booking, a custom project type) that no Connector version can know about in advance. For those, a Connector can let the system say what exists and have atrium make Tools from the answer, per Integration. Read this page before you build such a Connector.
 
 It needs atrium 5.2.0 or later, and SDK 1.2.0 or later to build.
 
@@ -8,16 +8,16 @@ It needs atrium 5.2.0 or later, and SDK 1.2.0 or later to build.
 
 Two kinds of Action do it. Neither is ever offered as a Tool itself.
 
-- **One discovery Action** asks the system what it holds. atrium runs it when an admin installs the Connector in a Workspace, when a new version is Added over one with installed Tools, and when an admin refreshes the Tools. It runs with that admin's own credential for the Integration.
-- **Template Actions** are the code the generated Tools run. A template is generic: "read records of an entity", "write a record". What makes it one Tool (which entity, which webservice, which fields) is that Tool's **binding**, which atrium hands the template with every call.
+- **One Discovery Action** asks the system what it holds. atrium runs it when an admin installs the Connector's Tools for an Integration, when a new version is Added over one with installed Tools, and when an admin refreshes the Tools. It runs with that admin's own credential for the Integration.
+- **Template Actions** are the code the Generated Tools run. A template is generic: "read records of an entity", "write a record". What makes it one Tool (which entity, which webservice, which fields) is that Tool's **Binding**, which atrium hands the template with every call.
 
 The steps:
 
 1. atrium runs discovery with input `{}`. It answers with the **catalog**: the entities the system has and the operations each allows.
 2. The admin picks entities and operations, and may add a hint per entity.
-3. atrium runs discovery again with the selection. It answers with finished **Tool definitions**: name, description, input schema, write flag, which template runs it, and its binding.
-4. atrium checks every definition and stores it on its Tool in that Workspace.
-5. When an AI client calls the Tool, atrium runs its template with the AI's input plus the binding under `__atriumBinding`.
+3. atrium runs discovery again with the selection. It answers with finished **Tool definitions**: name, description, input schema, write flag, which template runs it, and its Binding.
+4. atrium checks every definition and stores it on its Tool, for that Integration.
+5. When an AI client calls the Tool, atrium runs its template with the AI's input plus the Binding under `__atriumBinding`.
 
 Generated Tools are ordinary Tools everywhere else: write approval, Chat, MCP clients, the Studio's Test, call records.
 
@@ -68,10 +68,10 @@ Mark each of the two kinds with `kind`:
 ]
 ```
 
-Each needs a `description`, an `inputSchema` and a `write` flag, like any Action, and `check` holds them to the same rules (`parity`, `write-flag`; see [rules.md](rules.md)). The descriptions are for developers: no AI client ever reads them.
+Each needs a `description` and an `inputSchema`, like any Action, and `check` holds them to the same rules (`parity`, `write-flag`; see [rules.md](rules.md)): one that sends anything but `GET`, or declares no `httpMethods`, must say `write`; one that declares only `GET` may leave it out. The descriptions are for developers: no AI client ever reads them.
 
-- **The discovery Action** says `"write": false`: it only reads.
-- **Each template** says `write` truthfully: `false` for one that reads, `true` for one that creates, changes or deletes. A generated Tool's own `write` is what puts it behind approval, but atrium refuses a definition with `"write": false` that names a template with `"write": true`.
+- **The Discovery Action** says `"write": false`: it only reads.
+- **Each template** says `write` truthfully: `false` for one that reads, `true` for one that creates, changes or deletes. A Generated Tool's own `write` is what puts it behind approval, but atrium refuses a definition with `"write": false` that names a template with `"write": true`.
 
 A Connector may have ordinary Actions beside these. They stay installable as Tools, as before.
 
@@ -81,17 +81,17 @@ The rule `action-kind`, which `check` and `build` test:
 
 - `kind` is `"discovery"` or `"template"`, or left out for an ordinary Action.
 - At most one Action is `"discovery"`, and it doesn't declare `"write": true`.
-- Neither kind comes without the other: a discovery Action with no template generates Tools nothing can run, and templates with no discovery Action never run.
+- Neither kind comes without the other: a Discovery Action with no template generates Tools nothing can run, and templates with no Discovery Action never run.
 
 ### What the build writes
 
 Once any Action has a `kind`, the build publishes the manifest at format version 4 instead of 3, carrying each Action's `kind`. An atrium Release before 5.2.0 Adds only version 3, so it refuses the Connector at Add (`manifest-too-new`) rather than offering your templates as Tools. A Connector without a `kind` is published at version 3 exactly as before.
 
-The Bundle Contract doesn't change: the binding travels in the input, and `ctx` is the same. See [versions.md](versions.md).
+The Bundle Contract doesn't change: the Binding travels in the input, and `ctx` is the same. See [versions.md](versions.md).
 
 ## The discovery contract
 
-Your discovery Action takes one of two inputs and answers each with JSON.
+Your Discovery Action takes one of two inputs and answers each with JSON.
 
 ### Input `{}`: the catalog
 
@@ -221,17 +221,17 @@ export const readRecord = defineAction({
 });
 ```
 
-- Take `__atriumBinding` out first, then check the rest of the input against what the binding says the Tool takes.
+- Take `__atriumBinding` out first, then check the rest of the input against what the Binding says the Tool takes.
 - The template's `inputSchema` in `manifest.json` lists `__atriumBinding` too, as in the example above, because `check`'s `parity` rule compares the two lists of properties.
-- atrium removes any `__atriumBinding` an AI client sends, so the binding a template gets always comes from the stored definition.
+- atrium removes any `__atriumBinding` an AI client sends, so the Binding a template gets always comes from the stored definition.
 
-## Approvals of generated Tools
+## Approvals of Generated Tools
 
-atrium remembers approvals of write Tools, and a remembered approval ends when what the Tool does changes. For a generated Tool that is its template's code, its binding, its input schema and its write flag. Its description doesn't count, and neither do `description`, `title` and `examples` inside its input schema, so improving a text never makes people approve again. Anything else in the schema (a type, `required`, an enum) does count, and so does every byte of the binding.
+atrium remembers approvals of write Tools, and a remembered approval ends when what the Tool does changes. For a Generated Tool that is its template's code, its Binding, its input schema and its write flag. Its description doesn't count, and neither do `description`, `title` and `examples` inside its input schema, so improving a text never makes people approve again. Anything else in the schema (a type, `required`, an enum) does count, and so does every byte of the binding.
 
 ## Testing
 
 Test both kinds with `runAction` and a stand-in `ctx`, as any Action ([testing.md](testing.md)):
 
-- the discovery Action with `{}`, and with a selection: the definitions keep the rules above, an unknown entity gives a warning, a refusal from the system gives a clear `Error`;
+- the Discovery Action with `{}`, and with a selection: the definitions keep the rules above, an unknown entity gives a warning, a refusal from the system gives a clear `Error`;
 - each template with an input that carries `__atriumBinding`, and one that doesn't.

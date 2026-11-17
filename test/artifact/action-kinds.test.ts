@@ -24,7 +24,7 @@ import type { AtriumClient } from '../../src/client';
 import type { PublishedManifest } from '../../src/artifact';
 
 // Action kinds (atrium #12326): a discovery Action and template Actions, for a
-// Connector whose Tools are generated per Workspace. The published manifest
+// Connector whose Tools are generated per Integration. The published manifest
 // carries them only at manifestVersion 4, which atrium from 5.2.0 Adds and an
 // older one refuses; the fixtures build such a Connector for atrium's tests,
 // with bundles that answer the discovery contract and echo what a template got.
@@ -146,7 +146,37 @@ describe('the reader refuses a kind it cannot take', () => {
     });
     const error = await refusalOf(openArtifact(fixture.bytes, fixture.ring));
     expect(error.code).toBe('manifest-invalid');
-    expect(error.message).toContain('two discovery actions, "discover" and "read_record"');
+    expect(error.details).toMatchObject({ action: 'read_record', field: 'kind' });
+    expect(error.message).toContain('2 Discovery Actions ("discover", "read_record")');
+  });
+
+  test('a kind that is null, not left out', async () => {
+    const fixture = await buildArtifactFixture({
+      discovery: {},
+      manifest: editAction('read_record', (action) => {
+        action.kind = null;
+      }),
+    });
+    const error = await refusalOf(openArtifact(fixture.bytes, fixture.ring));
+    expect(error.code).toBe('manifest-invalid');
+    expect(error.details).toMatchObject({ action: 'read_record', field: 'kind' });
+    expect(error.message).toContain('has the kind null');
+  });
+
+  test('Template Actions without a Discovery Action, as the build refuses them too', async () => {
+    const fixture = await buildArtifactFixture({ templates: ['read_record'] });
+    const error = await refusalOf(openArtifact(fixture.bytes, fixture.ring));
+    expect(error.code).toBe('manifest-invalid');
+    expect(error.details).toMatchObject({ action: 'read_record', field: 'kind' });
+    expect(error.message).toContain('Template Actions ("read_record") but no Discovery Action');
+  });
+
+  test('a Discovery Action without a Template Action, as the build refuses it too', async () => {
+    const fixture = await buildArtifactFixture({ discovery: {}, templates: [] });
+    const error = await refusalOf(openArtifact(fixture.bytes, fixture.ring));
+    expect(error.code).toBe('manifest-invalid');
+    expect(error.details).toMatchObject({ action: 'discover', field: 'kind' });
+    expect(error.message).toContain('the Discovery Action "discover" but no Template Action');
   });
 
   test('a discovery Action that says it writes', async () => {

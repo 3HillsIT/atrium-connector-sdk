@@ -69,7 +69,7 @@ export const NAV_GROUPS: ReadonlyArray<{
     pages: [
       { page: 'manifest', about: 'Every field of manifest.json and its connection block.' },
       { page: 'actions', about: 'How to write an Action, and what ctx gives it.' },
-      { page: 'generated-tools', about: 'Tools the system generates per Workspace: a discovery Action and templates.' },
+      { page: 'generated-tools', about: 'Tools the system generates per Integration: a Discovery Action and templates.' },
       { page: 'rules', about: 'The rules that break a Connector. Read before you ship.' },
       { page: 'testing', about: 'Testing an Action without a real system.' },
       { page: 'build-and-sign', about: 'The commands, keys, signing, CI, and getting to Added.' },

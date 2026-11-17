@@ -10,12 +10,12 @@
 import { existsSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
 import {
-  ACTION_KINDS,
   CONNECTOR_ID_PATTERN,
   MANIFEST_FILE,
   ConnectorArtifactError,
   parseRequiredConnection,
 } from '../artifact';
+import { ACTION_KINDS_TEXT, findActionKindProblem, quotedNames } from '../artifact/action-kinds';
 import type { ActionKind, ConnectorConnection } from '../artifact';
 import { BuildRefusal } from './rules';
 
@@ -37,7 +37,7 @@ export interface SourceManifestAction {
   group?: string;
   /**
    * `discovery` (at most one) or `template`, for a Connector whose Tools are
-   * generated per Workspace; absent for an ordinary Action. Any Action with a
+   * generated per Integration; absent for an ordinary Action. Any Action with a
    * kind makes the build write manifestVersion 4.
    */
   kind?: ActionKind;
@@ -259,56 +259,46 @@ function assertBuildableConnector(source: SourceManifest, packageDir: string): v
 }
 
 /**
- * The `kind`s of a Connector whose Tools are generated: each one `discovery`
- * or `template`, at most one discovery Action, which doesn't write, and
- * neither kind without the other, since a discovery Action's Tools each name
- * a template and a template runs only for a generated Tool. The published
- * manifest's reader holds the first three too; this says them before
- * anything is built, in the build's words.
+ * The `kind`s of a Connector whose Tools are generated, checked by
+ * `findActionKindProblem`, the same check the published manifest's reader
+ * makes: each one `discovery` or `template`, at most one Discovery Action,
+ * which doesn't write, and neither kind without the other, since a Discovery
+ * Action's Tools each name a template and a template runs only for a
+ * Generated Tool. This says it before anything is built, in the build's
+ * words: what to change.
  */
 function assertUsableKinds(source: SourceManifest): void {
-  const discovery: string[] = [];
-  const templates: string[] = [];
-  for (const action of source.actions) {
-    const kind: unknown = action.kind;
-    if (kind === undefined) continue;
-    if (!(ACTION_KINDS as readonly unknown[]).includes(kind)) {
-      throw new BuildRefusal(
-        'action-kind',
-        `${source.id}'s action "${action.name}" declares the kind ${JSON.stringify(kind)}. A kind is ` +
-          '"discovery" or "template"; leave it out for an ordinary Action.',
+  const found = findActionKindProblem(source.actions);
+  if (found === undefined) return;
+  const refuse = (message: string): never => {
+    throw new BuildRefusal('action-kind', message);
+  };
+  switch (found.problem) {
+    case 'unknown-kind':
+      return refuse(
+        `${source.id}'s action "${found.action}" declares the kind ${JSON.stringify(found.kind)}. A kind is ` +
+          `${ACTION_KINDS_TEXT}; leave it out for an ordinary Action.`,
       );
-    }
-    (kind === 'discovery' ? discovery : templates).push(action.name);
-  }
-  if (discovery.length > 1) {
-    throw new BuildRefusal(
-      'action-kind',
-      `${source.id} declares ${discovery.length} discovery actions (${discovery.map((n) => `"${n}"`).join(', ')}); ` +
-        'a Connector has at most one. Keep one and make the others templates or ordinary Actions.',
-    );
-  }
-  const [discoveryName] = discovery;
-  if (discoveryName !== undefined && source.actions.find((a) => a.name === discoveryName)?.write === true) {
-    throw new BuildRefusal(
-      'action-kind',
-      `${source.id}'s discovery action "${discoveryName}" declares "write": true. Discovery only reads ` +
-        'what the system holds; set "write": false.',
-    );
-  }
-  if (discoveryName !== undefined && templates.length === 0) {
-    throw new BuildRefusal(
-      'action-kind',
-      `${source.id} declares the discovery action "${discoveryName}" but no template action, and every ` +
-        'Tool discovery generates names a template that runs it. Add a "kind": "template" Action.',
-    );
-  }
-  if (discoveryName === undefined && templates.length > 0) {
-    throw new BuildRefusal(
-      'action-kind',
-      `${source.id} declares template actions (${templates.map((n) => `"${n}"`).join(', ')}) but no ` +
-        'discovery action, so no Tool would ever run them. Add one "kind": "discovery" Action.',
-    );
+    case 'second-discovery':
+      return refuse(
+        `${source.id} declares ${found.names.length} Discovery Actions (${quotedNames(found.names)}); ` +
+          'a Connector has at most one. Keep one and make the others templates or ordinary Actions.',
+      );
+    case 'discovery-writes':
+      return refuse(
+        `${source.id}'s Discovery Action "${found.action}" declares "write": true. Discovery only reads ` +
+          'what the system holds; set "write": false.',
+      );
+    case 'discovery-without-template':
+      return refuse(
+        `${source.id} declares the Discovery Action "${found.action}" but no Template Action, and every ` +
+          'Tool discovery generates names a template that runs it. Add a "kind": "template" Action.',
+      );
+    case 'template-without-discovery':
+      return refuse(
+        `${source.id} declares Template Actions (${quotedNames(found.names)}) but no ` +
+          'Discovery Action, so no Tool would ever run them. Add one "kind": "discovery" Action.',
+      );
   }
 }
 

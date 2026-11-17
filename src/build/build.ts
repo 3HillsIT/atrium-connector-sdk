@@ -100,7 +100,7 @@ export async function buildConnector(
   const manifest: PublishedManifest = {
     // 4 only when an Action has a `kind`, so a Connector without one is
     // published exactly as before and every atrium that Adds 3 still Adds it.
-    manifestVersion: manifestVersionFor(actions) as PublishedManifest['manifestVersion'],
+    manifestVersion: manifestVersionFor(actions),
     id: source.id,
     displayName: source.displayName,
     version: options.version ?? source.version,

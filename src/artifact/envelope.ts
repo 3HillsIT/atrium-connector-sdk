@@ -33,8 +33,8 @@ import {
   verifySignatureFile,
 } from './signing';
 import { assertSafeEntryName, gunzip, gzip, readSafeEntries, readTar, writeTar } from './tar';
+import { ACTION_KINDS_TEXT, findActionKindProblem, quotedNames } from './action-kinds';
 import {
-  ACTION_KINDS,
   ACTION_KIND_MANIFEST_VERSION,
   ARTIFACT_EXTENSION,
   CONNECTION_MANIFEST_VERSION,
@@ -420,52 +420,68 @@ export function parsePublishedManifest(
 }
 
 /**
- * Each Action's `kind`, when it has one: `discovery` or `template`, only at
- * manifestVersion 4 and later (an older reader would take the Action for an
- * installable one), at most one `discovery`, and a discovery Action that
- * doesn't claim to write (it is never a Tool, and atrium runs it to read the
- * system's catalog). A template's `write` is read as any Action's.
+ * Each Action's `kind`, when it has one: only at manifestVersion 4 and later
+ * (an older reader would take the Action for an installable one), and the
+ * kinds together as `findActionKindProblem` holds them, the same check the
+ * build makes: `discovery` or `template`, at most one Discovery Action, which
+ * doesn't claim to write, and neither kind without the other. A template's
+ * `write` is read as any Action's.
  */
 function checkActionKinds(manifest: PublishedManifest, manifestVersion: number): void {
-  let discovery: string | undefined;
-  for (const action of manifest.actions) {
-    if (!('kind' in action)) continue;
-    const kind: unknown = action.kind;
-    if (manifestVersion < ACTION_KIND_MANIFEST_VERSION) {
+  if (manifestVersion < ACTION_KIND_MANIFEST_VERSION) {
+    const kinded = manifest.actions.find((action) => 'kind' in action);
+    if (kinded !== undefined) {
       throw artifactError(
         'manifest-invalid',
         `${MANIFEST_FILE} declares manifestVersion ${manifestVersion} but its action ` +
-          `"${action.name}" has a kind, which only manifestVersion ${ACTION_KIND_MANIFEST_VERSION} ` +
+          `"${kinded.name}" has a kind, which only manifestVersion ${ACTION_KIND_MANIFEST_VERSION} ` +
           'and later may declare.',
-        { action: action.name, field: 'kind', manifestVersion: String(manifestVersion) },
+        { action: kinded.name, field: 'kind', manifestVersion: String(manifestVersion) },
       );
     }
-    if (!(ACTION_KINDS as readonly unknown[]).includes(kind)) {
+    return;
+  }
+  // `'kind' in action` above, `kind: undefined` here: JSON has no undefined,
+  // so a parsed manifest's key is either absent or holds a value.
+  const found = findActionKindProblem(manifest.actions);
+  if (found === undefined) return;
+  const where = { action: found.action, field: 'kind' };
+  switch (found.problem) {
+    case 'unknown-kind':
       throw artifactError(
         'manifest-invalid',
-        `${MANIFEST_FILE}'s action "${action.name}" has the kind ${JSON.stringify(kind)}; a kind is ` +
-          `${ACTION_KINDS.map((k) => `"${k}"`).join(' or ')}, or left out.`,
-        { action: action.name, field: 'kind' },
+        `${MANIFEST_FILE}'s action "${found.action}" has the kind ${JSON.stringify(found.kind)}; a kind is ` +
+          `${ACTION_KINDS_TEXT}, or left out.`,
+        where,
       );
-    }
-    if (kind !== 'discovery') continue;
-    if (discovery !== undefined) {
+    case 'second-discovery':
       throw artifactError(
         'manifest-invalid',
-        `${MANIFEST_FILE} has two discovery actions, "${discovery}" and "${action.name}"; a ` +
+        `${MANIFEST_FILE} has ${found.names.length} Discovery Actions (${quotedNames(found.names)}); a ` +
           'Connector has at most one.',
-        { action: action.name, field: 'kind' },
+        where,
       );
-    }
-    if (action.write === true) {
+    case 'discovery-writes':
       throw artifactError(
         'manifest-invalid',
-        `${MANIFEST_FILE}'s discovery action "${action.name}" declares "write": true; a discovery ` +
-          'action only reads the catalog of what the system holds.',
-        { action: action.name, field: 'write' },
+        `${MANIFEST_FILE}'s Discovery Action "${found.action}" declares "write": true; a Discovery ` +
+          'Action only reads the catalog of what the system holds.',
+        { action: found.action, field: 'write' },
       );
-    }
-    discovery = action.name;
+    case 'discovery-without-template':
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE} has the Discovery Action "${found.action}" but no Template Action, so no ` +
+          'Tool it generates could run.',
+        where,
+      );
+    case 'template-without-discovery':
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE} has Template Actions (${quotedNames(found.names)}) but no Discovery Action, ` +
+          'so no Tool would ever run them.',
+        where,
+      );
   }
 }
 

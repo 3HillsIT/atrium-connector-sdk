@@ -79,7 +79,7 @@ Other top-level keys are left out of the published manifest. A `_comment` array 
 | `httpMethods` | The HTTP methods the handler sends, such as `["GET"]`. atrium treats it as documentation; `check` reads it for the `write-flag` rule. |
 | `write` | `true` if the Action changes anything in the system. Only `true` puts its Tools behind atrium's write approval. `false` says an Action that sends more than GET only reads (a search sent as POST). Leave it out only for a read whose `httpMethods` say `GET`. See [rules.md](rules.md). |
 | `group` | Optional. The heading the Studio groups the Action under when an admin installs it ("Issues", "Projects"). The rule `action-group`: a non-empty string of at most 40 characters, trimmed. Leave it out rather than empty. |
-| `kind` | Optional. `"discovery"` or `"template"`, for a Connector whose Tools the system generates per Workspace; an Action with a `kind` is never a Tool itself. Leave it out for an ordinary Action. See [generated-tools.md](generated-tools.md). |
+| `kind` | Optional. `"discovery"` or `"template"`, for a Connector whose Tools the system generates per Integration; an Action with a `kind` is never a Tool itself. Leave it out for an ordinary Action. See [generated-tools.md](generated-tools.md). |
 
 The rules that hold `actions` and your code together (`exports-and-names`, `parity`, `write-flag`) are on [rules.md](rules.md).
 

@@ -354,7 +354,7 @@ export function fixtureDiscoveryBundle(discovery: FixtureDiscovery = {}): Uint8A
  * `request`, it sends the call on to the system first (see `FixtureTemplate`).
  */
 export function fixtureTemplateBundle(template: string | FixtureTemplate): Uint8Array {
-  const spec = typeof template === 'string' ? { name: template } : template;
+  const spec = templateOf(template);
   return utf8(
     `// fixture template bundle for ${spec.name}\n` +
       `const spec = ${JSON.stringify({ name: spec.name, write: spec.write === true, request: spec.request === true })};\n` +
@@ -371,6 +371,11 @@ export function fixtureTemplateBundle(template: string | FixtureTemplate): Uint8
   );
 }
 
+/** A template given by name alone is a read template that doesn't call the system. */
+function templateOf(template: string | FixtureTemplate): FixtureTemplate {
+  return typeof template === 'string' ? { name: template } : template;
+}
+
 /**
  * Builds a valid, signed artifact. Every parameter has a working default, so a
  * test that cares about one property states only that property.
@@ -380,11 +385,9 @@ export async function buildArtifactFixture(
 ): Promise<ArtifactFixture> {
   const id = params.id ?? 'fixture-connector';
   const version = params.version ?? '1.0.0';
-  const generated = params.discovery !== undefined || params.templates !== undefined;
-  const actionNames = params.actions ?? (generated ? [] : ['list_things']);
-  const templates = (params.templates ?? (params.discovery ? FIXTURE_TEMPLATES : [])).map(
-    (template): FixtureTemplate => (typeof template === 'string' ? { name: template } : template),
-  );
+  const generatesTools = params.discovery !== undefined || params.templates !== undefined;
+  const actionNames = params.actions ?? (generatesTools ? [] : ['list_things']);
+  const templates = (params.templates ?? (params.discovery ? FIXTURE_TEMPLATES : [])).map(templateOf);
   const signers = params.signers ?? [await createFixtureKey()];
 
   const files = new Map<string, Uint8Array>();

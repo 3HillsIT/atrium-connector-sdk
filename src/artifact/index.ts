@@ -170,8 +170,10 @@ export {
 export type {
   ArtifactFixture,
   BuildFixtureParams,
+  FixtureCatalogEntity,
   FixtureDiscovery,
   FixtureKey,
   FixtureTemplate,
+  FixtureToolDefinition,
   RepackParams,
 } from './fixtures';

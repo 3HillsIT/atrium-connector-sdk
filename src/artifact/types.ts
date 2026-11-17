@@ -28,7 +28,7 @@ export const PUBLISHED_MANIFEST_VERSION = 3;
 
 /**
  * The first manifestVersion whose Actions may carry a `kind` (a discovery
- * Action, template Actions: Tools generated per Workspace, atrium #12326).
+ * Action, template Actions: Tools generated per Integration, atrium #12326).
  * The build writes it only when an Action has a `kind`, so an atrium that
  * Adds only 3 refuses such a Connector at Add instead of offering its
  * discovery and template Actions as Tools. Nothing else changes from 3: the
@@ -45,7 +45,7 @@ export const ACTION_KIND_MANIFEST_VERSION = 4;
  * left, a Connector Added from one could never connect. 4 is 3 plus Action
  * kinds (`ACTION_KIND_MANIFEST_VERSION`).
  */
-export const ADDABLE_MANIFEST_VERSIONS = [3, 4] as const;
+export const ADDABLE_MANIFEST_VERSIONS = [PUBLISHED_MANIFEST_VERSION, ACTION_KIND_MANIFEST_VERSION] as const;
 
 /**
  * Every manifestVersion a version the Instance already holds is read at,
@@ -57,7 +57,7 @@ export const ADDABLE_MANIFEST_VERSIONS = [3, 4] as const;
  * settings. The legacy `{ entry, actions }` source shape is read too, by atrium's
  * `services/connector-install.ts`.
  */
-export const READABLE_MANIFEST_VERSIONS = [2, 3, 4] as const;
+export const READABLE_MANIFEST_VERSIONS = [2, ...ADDABLE_MANIFEST_VERSIONS] as const;
 
 export type ReadableManifestVersion = (typeof READABLE_MANIFEST_VERSIONS)[number];
 
@@ -93,7 +93,9 @@ export type ActionKind = (typeof ACTION_KINDS)[number];
  * `PUBLISHED_MANIFEST_VERSION` otherwise, so a Connector without one is
  * published exactly as before.
  */
-export function manifestVersionFor(actions: ReadonlyArray<{ kind?: unknown }>): number {
+export function manifestVersionFor(
+  actions: ReadonlyArray<{ kind?: unknown }>,
+): typeof PUBLISHED_MANIFEST_VERSION | typeof ACTION_KIND_MANIFEST_VERSION {
   return actions.some((action) => action.kind !== undefined)
     ? ACTION_KIND_MANIFEST_VERSION
     : PUBLISHED_MANIFEST_VERSION;

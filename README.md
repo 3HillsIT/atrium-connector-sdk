@@ -39,7 +39,7 @@ One page per topic, in `docs/`. The same pages ship inside the package, in `node
 | [concepts](docs/concepts.md) | start: Connector, Action, Tool, Integration, and what atrium reads and runs |
 | [manifest](docs/manifest.md) | touch `manifest.json` or its `connection` block |
 | [actions](docs/actions.md) | write an Action |
-| [generated-tools](docs/generated-tools.md) | let the system say which Tools exist: a discovery Action and templates, Tools generated per Workspace |
+| [generated-tools](docs/generated-tools.md) | let the system say which Tools exist: a Discovery Action and templates, Tools generated per Integration |
 | [rules](docs/rules.md) | ship: the rules that break a Connector |
 | [testing](docs/testing.md) | write tests |
 | [build-and-sign](docs/build-and-sign.md) | build, sign, make a key or set up CI |

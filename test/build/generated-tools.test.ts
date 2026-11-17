@@ -7,7 +7,7 @@ import { checkConnector } from '../../src/build';
 import { ENTRY_SOURCE, makeConnectorRepo, runCommand } from '../support/connector-repo';
 import type { ConnectorRepo } from '../support/connector-repo';
 
-// A Connector whose Tools are generated per Workspace (atrium #12326): one
+// A Connector whose Tools are generated per Integration (atrium #12326): one
 // discovery Action and template Actions, marked with `kind` in manifest.json.
 // The build carries `kind` into the published manifest and stamps
 // manifestVersion 4 only then; a template that declares `__atriumBinding` in
@@ -143,39 +143,51 @@ describe('check refuses kinds that make no sense, under the rule action-kind', (
 
     expect(run.exitCode).toBe(1);
     expect(run.stderr).toContain('✗ action-kind: ');
-    expect(run.stderr).toContain('thing-connector declares 2 discovery actions ("list_things", "discover")');
+    expect(run.stderr).toContain('thing-connector declares 2 Discovery Actions ("list_things", "discover")');
     expect(run.stderr).toContain('a Connector has at most one');
     expect(run.stderr).toContain('Guide: node_modules/@3hillsit/atrium-connector-sdk/docs/generated-tools.md');
   });
 
-  const refused: { name: string; edit: (actions: any[]) => void; message: string }[] = [
+  type ManifestAction = { name: string; kind?: unknown; write?: unknown };
+  /** The source manifest's Action named `name`, to edit in place. */
+  const named = (actions: ManifestAction[], name: string): ManifestAction =>
+    actions.find((action) => action.name === name)!;
+
+  const refused: { name: string; edit: (actions: ManifestAction[]) => void; message: string }[] = [
     {
       name: 'a kind that is neither discovery nor template',
       edit: (actions) => {
-        actions.find((action) => action.name === 'read_record').kind = 'tool';
+        named(actions, 'read_record').kind = 'tool';
       },
       message: 'thing-connector\'s action "read_record" declares the kind "tool"',
     },
     {
+      name: 'a kind that is null, not left out',
+      edit: (actions) => {
+        named(actions, 'read_record').kind = null;
+      },
+      message: 'thing-connector\'s action "read_record" declares the kind null',
+    },
+    {
       name: 'a discovery Action that says it writes',
       edit: (actions) => {
-        actions.find((action) => action.name === 'discover').write = true;
+        named(actions, 'discover').write = true;
       },
-      message: 'thing-connector\'s discovery action "discover" declares "write": true',
+      message: 'thing-connector\'s Discovery Action "discover" declares "write": true',
     },
     {
       name: 'templates without a discovery Action',
       edit: (actions) => {
-        delete actions.find((action) => action.name === 'discover').kind;
+        delete named(actions, 'discover').kind;
       },
-      message: 'thing-connector declares template actions ("read_record") but no discovery action',
+      message: 'thing-connector declares Template Actions ("read_record") but no Discovery Action',
     },
     {
       name: 'a discovery Action without a template',
       edit: (actions) => {
-        delete actions.find((action) => action.name === 'read_record').kind;
+        delete named(actions, 'read_record').kind;
       },
-      message: 'thing-connector declares the discovery action "discover" but no template action',
+      message: 'thing-connector declares the Discovery Action "discover" but no Template Action',
     },
   ];
   for (const { name, edit, message } of refused) {
