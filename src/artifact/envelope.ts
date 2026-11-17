@@ -34,6 +34,8 @@ import {
 } from './signing';
 import { assertSafeEntryName, gunzip, gzip, readSafeEntries, readTar, writeTar } from './tar';
 import {
+  ACTION_KINDS,
+  ACTION_KIND_MANIFEST_VERSION,
   ARTIFACT_EXTENSION,
   CONNECTION_MANIFEST_VERSION,
   CONNECTOR_ID_PATTERN,
@@ -319,8 +321,9 @@ export function readEnvelope(bytes: Uint8Array): EnvelopeParts {
 /**
  * Parses and checks a published manifest. `reading` picks the set it is held
  * to (see `ManifestReading`): an Artifact being Added must be manifest
- * version 3 and carry a `connection` block; a version already in the
+ * version 3 or 4 and carry a `connection` block; a version already in the
  * Connector Volume is read at any version this Atrium reads, for what it is.
+ * Either way, each Action's `kind` is checked (`checkActionKinds`).
  */
 export function parsePublishedManifest(
   data: Uint8Array | undefined,
@@ -412,7 +415,58 @@ export function parsePublishedManifest(
     );
   }
   checkConnectionBlock(manifest, reading);
+  checkActionKinds(manifest as PublishedManifest, manifestVersion);
   return manifest as PublishedManifest;
+}
+
+/**
+ * Each Action's `kind`, when it has one: `discovery` or `template`, only at
+ * manifestVersion 4 and later (an older reader would take the Action for an
+ * installable one), at most one `discovery`, and a discovery Action that
+ * doesn't claim to write (it is never a Tool, and atrium runs it to read the
+ * system's catalog). A template's `write` is read as any Action's.
+ */
+function checkActionKinds(manifest: PublishedManifest, manifestVersion: number): void {
+  let discovery: string | undefined;
+  for (const action of manifest.actions) {
+    if (!('kind' in action)) continue;
+    const kind: unknown = action.kind;
+    if (manifestVersion < ACTION_KIND_MANIFEST_VERSION) {
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE} declares manifestVersion ${manifestVersion} but its action ` +
+          `"${action.name}" has a kind, which only manifestVersion ${ACTION_KIND_MANIFEST_VERSION} ` +
+          'and later may declare.',
+        { action: action.name, field: 'kind', manifestVersion: String(manifestVersion) },
+      );
+    }
+    if (!(ACTION_KINDS as readonly unknown[]).includes(kind)) {
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE}'s action "${action.name}" has the kind ${JSON.stringify(kind)}; a kind is ` +
+          `${ACTION_KINDS.map((k) => `"${k}"`).join(' or ')}, or left out.`,
+        { action: action.name, field: 'kind' },
+      );
+    }
+    if (kind !== 'discovery') continue;
+    if (discovery !== undefined) {
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE} has two discovery actions, "${discovery}" and "${action.name}"; a ` +
+          'Connector has at most one.',
+        { action: action.name, field: 'kind' },
+      );
+    }
+    if (action.write === true) {
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE}'s discovery action "${action.name}" declares "write": true; a discovery ` +
+          'action only reads the catalog of what the system holds.',
+        { action: action.name, field: 'write' },
+      );
+    }
+    discovery = action.name;
+  }
 }
 
 /**

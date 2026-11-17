@@ -118,6 +118,8 @@ export {
   LISTING_FILE,
   MANIFEST_FILE,
   PUBLISHED_MANIFEST_VERSION,
+  ACTION_KIND_MANIFEST_VERSION,
+  ACTION_KINDS,
   ADDABLE_MANIFEST_VERSIONS,
   READABLE_MANIFEST_VERSIONS,
   CONNECTION_MANIFEST_VERSION,
@@ -125,8 +127,10 @@ export {
   CONNECTOR_VERSION_PATTERN,
   CONNECTION_AUTH_TYPES,
   artifactFileName,
+  manifestVersionFor,
 } from './types';
 export type {
+  ActionKind,
   ArtifactSignature,
   ConnectionAuth,
   ConnectionAuthType,
@@ -151,11 +155,23 @@ export type {
  * of real keys accepts.
  */
 export {
+  FIXTURE_DISCOVERY_ENTITIES,
+  FIXTURE_TEMPLATES,
+  FIXTURE_TOOL_DEFINITIONS,
   buildArtifactFixture,
   createFixtureKey,
   fixtureBundle,
   fixtureConnection,
+  fixtureDiscoveryBundle,
+  fixtureTemplateBundle,
   payloadFilesOf,
   repackArtifactFixture,
 } from './fixtures';
-export type { ArtifactFixture, BuildFixtureParams, FixtureKey, RepackParams } from './fixtures';
+export type {
+  ArtifactFixture,
+  BuildFixtureParams,
+  FixtureDiscovery,
+  FixtureKey,
+  FixtureTemplate,
+  RepackParams,
+} from './fixtures';
