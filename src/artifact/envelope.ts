@@ -33,7 +33,9 @@ import {
   verifySignatureFile,
 } from './signing';
 import { assertSafeEntryName, gunzip, gzip, readSafeEntries, readTar, writeTar } from './tar';
+import { ACTION_KINDS_TEXT, findActionKindProblem, quotedNames } from './action-kinds';
 import {
+  ACTION_KIND_MANIFEST_VERSION,
   ARTIFACT_EXTENSION,
   CONNECTION_MANIFEST_VERSION,
   CONNECTOR_ID_PATTERN,
@@ -319,8 +321,9 @@ export function readEnvelope(bytes: Uint8Array): EnvelopeParts {
 /**
  * Parses and checks a published manifest. `reading` picks the set it is held
  * to (see `ManifestReading`): an Artifact being Added must be manifest
- * version 3 and carry a `connection` block; a version already in the
+ * version 3 or 4 and carry a `connection` block; a version already in the
  * Connector Volume is read at any version this Atrium reads, for what it is.
+ * Either way, each Action's `kind` is checked (`checkActionKinds`).
  */
 export function parsePublishedManifest(
   data: Uint8Array | undefined,
@@ -412,7 +415,74 @@ export function parsePublishedManifest(
     );
   }
   checkConnectionBlock(manifest, reading);
+  checkActionKinds(manifest as PublishedManifest, manifestVersion);
   return manifest as PublishedManifest;
+}
+
+/**
+ * Each Action's `kind`, when it has one: only at manifestVersion 4 and later
+ * (an older reader would take the Action for an installable one), and the
+ * kinds together as `findActionKindProblem` holds them, the same check the
+ * build makes: `discovery` or `template`, at most one Discovery Action, which
+ * doesn't claim to write, and neither kind without the other. A template's
+ * `write` is read as any Action's.
+ */
+function checkActionKinds(manifest: PublishedManifest, manifestVersion: number): void {
+  if (manifestVersion < ACTION_KIND_MANIFEST_VERSION) {
+    const kinded = manifest.actions.find((action) => 'kind' in action);
+    if (kinded !== undefined) {
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE} declares manifestVersion ${manifestVersion} but its action ` +
+          `"${kinded.name}" has a kind, which only manifestVersion ${ACTION_KIND_MANIFEST_VERSION} ` +
+          'and later may declare.',
+        { action: kinded.name, field: 'kind', manifestVersion: String(manifestVersion) },
+      );
+    }
+    return;
+  }
+  // `'kind' in action` above, `kind: undefined` here: JSON has no undefined,
+  // so a parsed manifest's key is either absent or holds a value.
+  const found = findActionKindProblem(manifest.actions);
+  if (found === undefined) return;
+  const where = { action: found.action, field: 'kind' };
+  switch (found.problem) {
+    case 'unknown-kind':
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE}'s action "${found.action}" has the kind ${JSON.stringify(found.kind)}; a kind is ` +
+          `${ACTION_KINDS_TEXT}, or left out.`,
+        where,
+      );
+    case 'second-discovery':
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE} has ${found.names.length} Discovery Actions (${quotedNames(found.names)}); a ` +
+          'Connector has at most one.',
+        where,
+      );
+    case 'discovery-writes':
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE}'s Discovery Action "${found.action}" declares "write": true; a Discovery ` +
+          'Action only reads the catalog of what the system holds.',
+        { action: found.action, field: 'write' },
+      );
+    case 'discovery-without-template':
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE} has the Discovery Action "${found.action}" but no Template Action, so no ` +
+          'Tool it generates could run.',
+        where,
+      );
+    case 'template-without-discovery':
+      throw artifactError(
+        'manifest-invalid',
+        `${MANIFEST_FILE} has Template Actions (${quotedNames(found.names)}) but no Discovery Action, ` +
+          'so no Tool would ever run them.',
+        where,
+      );
+  }
 }
 
 /**

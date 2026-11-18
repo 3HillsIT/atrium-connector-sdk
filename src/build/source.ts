@@ -15,7 +15,8 @@ import {
   ConnectorArtifactError,
   parseRequiredConnection,
 } from '../artifact';
-import type { ConnectorConnection } from '../artifact';
+import { ACTION_KINDS_TEXT, findActionKindProblem, quotedNames } from '../artifact/action-kinds';
+import type { ActionKind, ConnectorConnection } from '../artifact';
 import { BuildRefusal } from './rules';
 
 /** One Action as a Connector's own manifest.json declares it. */
@@ -34,6 +35,12 @@ export interface SourceManifestAction {
   write?: boolean;
   /** The heading Install Connector groups the Action under, at most 40 characters. */
   group?: string;
+  /**
+   * `discovery` (at most one) or `template`, for a Connector whose Tools are
+   * generated per Integration; absent for an ordinary Action. Any Action with a
+   * kind makes the build write manifestVersion 4.
+   */
+  kind?: ActionKind;
 }
 
 /**
@@ -247,6 +254,51 @@ function assertBuildableConnector(source: SourceManifest, packageDir: string): v
       'manifest',
       `${source.id}'s manifest declares no actions, so there is nothing to build.`,
     );
+  }
+  assertUsableKinds(source);
+}
+
+/**
+ * The `kind`s of a Connector whose Tools are generated, checked by
+ * `findActionKindProblem`, the same check the published manifest's reader
+ * makes: each one `discovery` or `template`, at most one Discovery Action,
+ * which doesn't write, and neither kind without the other, since a Discovery
+ * Action's Tools each name a template and a template runs only for a
+ * Generated Tool. This says it before anything is built, in the build's
+ * words: what to change.
+ */
+function assertUsableKinds(source: SourceManifest): void {
+  const found = findActionKindProblem(source.actions);
+  if (found === undefined) return;
+  const refuse = (message: string): never => {
+    throw new BuildRefusal('action-kind', message);
+  };
+  switch (found.problem) {
+    case 'unknown-kind':
+      return refuse(
+        `${source.id}'s action "${found.action}" declares the kind ${JSON.stringify(found.kind)}. A kind is ` +
+          `${ACTION_KINDS_TEXT}; leave it out for an ordinary Action.`,
+      );
+    case 'second-discovery':
+      return refuse(
+        `${source.id} declares ${found.names.length} Discovery Actions (${quotedNames(found.names)}); ` +
+          'a Connector has at most one. Keep one and make the others templates or ordinary Actions.',
+      );
+    case 'discovery-writes':
+      return refuse(
+        `${source.id}'s Discovery Action "${found.action}" declares "write": true. Discovery only reads ` +
+          'what the system holds; set "write": false.',
+      );
+    case 'discovery-without-template':
+      return refuse(
+        `${source.id} declares the Discovery Action "${found.action}" but no Template Action, and every ` +
+          'Tool discovery generates names a template that runs it. Add a "kind": "template" Action.',
+      );
+    case 'template-without-discovery':
+      return refuse(
+        `${source.id} declares Template Actions (${quotedNames(found.names)}) but no ` +
+          'Discovery Action, so no Tool would ever run them. Add one "kind": "discovery" Action.',
+      );
   }
 }
 

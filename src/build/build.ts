@@ -19,7 +19,7 @@
 //      one part carried across is the `connection` block, validated before
 //      anything is built (readConnectorSource), then copied unchanged.
 
-import { PUBLISHED_MANIFEST_VERSION, utf8 } from '../artifact';
+import { manifestVersionFor, utf8 } from '../artifact';
 import type { PublishedManifest, PublishedManifestAction } from '../artifact';
 import { buildActionBundle } from './bundle';
 import { readBundleContractVersion } from './contract';
@@ -98,7 +98,9 @@ export async function buildConnector(
   }
 
   const manifest: PublishedManifest = {
-    manifestVersion: PUBLISHED_MANIFEST_VERSION,
+    // 4 only when an Action has a `kind`, so a Connector without one is
+    // published exactly as before and every atrium that Adds 3 still Adds it.
+    manifestVersion: manifestVersionFor(actions),
     id: source.id,
     displayName: source.displayName,
     version: options.version ?? source.version,
@@ -112,7 +114,8 @@ export async function buildConnector(
 
 /**
  * The source action, carried through unchanged except for the bundle path, a
- * trimmed `group`, and `write`, which is carried only when it is `true`.
+ * trimmed `group`, `write`, which is carried only when it is `true`, and
+ * `kind`, carried when there is one.
  */
 function publishedAction(action: SourceManifestAction, bundlePath: string): PublishedManifestAction {
   return {
@@ -123,6 +126,7 @@ function publishedAction(action: SourceManifestAction, bundlePath: string): Publ
     ...(action.httpMethods ? { httpMethods: action.httpMethods } : {}),
     ...(action.write === true ? { write: true } : {}),
     ...(typeof action.group === 'string' ? { group: action.group.trim() } : {}),
+    ...(action.kind !== undefined ? { kind: action.kind } : {}),
   };
 }
 

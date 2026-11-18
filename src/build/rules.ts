@@ -13,6 +13,7 @@ export const GUIDE_PAGES = [
   'concepts',
   'manifest',
   'actions',
+  'generated-tools',
   'rules',
   'testing',
   'build-and-sign',
@@ -33,6 +34,8 @@ export const RULES = {
   connection: { page: 'manifest' },
   /** An Action's `group` is a usable heading. */
   'action-group': { page: 'manifest' },
+  /** Action `kind`s: discovery or template, one discovery at most, neither without the other. */
+  'action-kind': { page: 'generated-tools' },
   /** The version is a plain MAJOR.MINOR.PATCH, the same in manifest.json and package.json. */
   versions: { page: 'versions' },
   /** Every Action manifest.json declares is exported from the entry module, under a usable name. */

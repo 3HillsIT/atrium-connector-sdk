@@ -15,8 +15,10 @@ export const LISTING_FILE = 'ATRIUM-SIGNED.json';
 
 /**
  * The shape of the published manifest — distinct from the source manifest an
- * author writes. This is the version publish WRITES; what Add accepts and
- * what a held version is read at are the two sets below.
+ * author writes. This is the version publish WRITES for a Connector none of
+ * whose Actions has a `kind`; one that has writes `ACTION_KIND_MANIFEST_VERSION`
+ * (`manifestVersionFor`). What Add accepts and what a held version is read at
+ * are the two sets below.
  *
  * 3 adds the `connection` block (ADR-0014 §2), and requires it: it is the
  * only source of a Connector's connection settings (spec part C, "Only the
@@ -25,24 +27,37 @@ export const LISTING_FILE = 'ATRIUM-SIGNED.json';
 export const PUBLISHED_MANIFEST_VERSION = 3;
 
 /**
+ * The first manifestVersion whose Actions may carry a `kind` (a discovery
+ * Action, template Actions: Tools generated per Integration, atrium #12326).
+ * The build writes it only when an Action has a `kind`, so an atrium that
+ * Adds only 3 refuses such a Connector at Add instead of offering its
+ * discovery and template Actions as Tools. Nothing else changes from 3: the
+ * `connection` block is required as before, and the Bundle Contract is not
+ * touched.
+ */
+export const ACTION_KIND_MANIFEST_VERSION = 4;
+
+/**
  * Every manifestVersion Add accepts, oldest first. Anything outside it is
  * refused with one of two remedies (ADR-0007's two-remedy rule): above it,
  * upgrade the Instance; below it, obtain a newer Artifact. A version-2
  * Artifact brings no connection settings, and with no other source of them
- * left, a Connector Added from one could never connect.
+ * left, a Connector Added from one could never connect. 4 is 3 plus Action
+ * kinds (`ACTION_KIND_MANIFEST_VERSION`).
  */
-export const ADDABLE_MANIFEST_VERSIONS = [3] as const;
+export const ADDABLE_MANIFEST_VERSIONS = [PUBLISHED_MANIFEST_VERSION, ACTION_KIND_MANIFEST_VERSION] as const;
 
 /**
  * Every manifestVersion a version the Instance already holds is read at,
  * oldest first: wider than what Add accepts, because a Connector Added by an
  * earlier Release is still on the Instance. Read for what it is, it stays
  * listed, can be Removed, and its Actions are still matched against when a
- * newer version is Added. It just cannot connect: only a version-3
- * `connection` block yields connection settings. The legacy `{ entry,
- * actions }` source shape is read too, by atrium's `services/connector-install.ts`.
+ * newer version is Added. A version-2 one just cannot connect: only a
+ * `connection` block, which version 3 and later carry, yields connection
+ * settings. The legacy `{ entry, actions }` source shape is read too, by atrium's
+ * `services/connector-install.ts`.
  */
-export const READABLE_MANIFEST_VERSIONS = [2, 3] as const;
+export const READABLE_MANIFEST_VERSIONS = [2, ...ADDABLE_MANIFEST_VERSIONS] as const;
 
 export type ReadableManifestVersion = (typeof READABLE_MANIFEST_VERSIONS)[number];
 
@@ -55,6 +70,36 @@ export type ManifestReading = 'add' | 'held';
 
 /** The first manifestVersion that may carry a `connection` block, and must. */
 export const CONNECTION_MANIFEST_VERSION = 3;
+
+/**
+ * What an Action's `kind` may say. An Action without one is an ordinary
+ * Action, installable as a Tool. One with a `kind` never is:
+ *
+ * - `discovery`: at most one per Connector. atrium runs it with an admin's own
+ *   credential: with input `{}` it returns the catalog of what the system
+ *   holds, with `{ selection }` the finished Tool definitions for what the
+ *   admin picked.
+ * - `template`: the code a generated Tool runs. It gets the AI's input plus the
+ *   Tool's binding under `__atriumBinding`.
+ */
+export const ACTION_KINDS = ['discovery', 'template'] as const;
+
+/** `discovery` or `template`. */
+export type ActionKind = (typeof ACTION_KINDS)[number];
+
+/**
+ * The manifestVersion the build writes for these Actions:
+ * `ACTION_KIND_MANIFEST_VERSION` when any of them has a `kind`,
+ * `PUBLISHED_MANIFEST_VERSION` otherwise, so a Connector without one is
+ * published exactly as before.
+ */
+export function manifestVersionFor(
+  actions: ReadonlyArray<{ kind?: unknown }>,
+): typeof PUBLISHED_MANIFEST_VERSION | typeof ACTION_KIND_MANIFEST_VERSION {
+  return actions.some((action) => action.kind !== undefined)
+    ? ACTION_KIND_MANIFEST_VERSION
+    : PUBLISHED_MANIFEST_VERSION;
+}
 
 /**
  * One field an Integration of this Connector asks for. The same shape the
@@ -148,6 +193,13 @@ export interface PublishedManifestAction {
    * over 40 characters. A missing or blank one reads as none.
    */
   group?: string;
+  /**
+   * `discovery` or `template` (see `ACTION_KINDS`); absent for an ordinary
+   * Action. Only manifestVersion 4 and later may carry it, and at most one
+   * Action is `discovery`. An Action with a kind is never installable as a
+   * Tool.
+   */
+  kind?: ActionKind;
 }
 
 export interface PublishedManifest {

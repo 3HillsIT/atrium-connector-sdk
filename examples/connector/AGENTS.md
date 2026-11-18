@@ -40,6 +40,7 @@ Pages in `node_modules/@3hillsit/atrium-connector-sdk/docs/`:
 | start on this repo | `concepts.md` |
 | touch `manifest.json` or its `connection` block | `manifest.md` |
 | write or change an Action | `actions.md`, then `rules.md` |
+| have the system's own entities generate Tools per Integration (a Discovery Action and templates) | `generated-tools.md` |
 | write tests | `testing.md` |
 | build, or set up CI | `build-and-sign.md` |
 | raise a version or update the SDK | `versions.md` |

@@ -93,6 +93,12 @@ An admin sees a refusal in the Studio's Add Connector drawer or under Refused in
 **It means:** the file speaks a Bundle Contract version newer than this atrium runs.
 **What to do:** the Instance needs a newer atrium; its operator updates it, then rescans. If the Instance must take the Connector before that, build it with an SDK major whose Bundle Contract version the Instance accepts, under a new version.
 
+### manifest-too-new
+
+**The Studio says:** that the Connector was published for a newer atrium Version.
+**It means:** the file's manifest is in a format this atrium can't Add yet. A Connector with discovery and Template Actions is published at format version 4, which atrium Adds from 5.2.0 ([generated-tools.md](generated-tools.md#what-the-build-writes)).
+**What to do:** the Instance needs a newer atrium; its operator updates it, then Adds the Connector again.
+
 ### filename-mismatch
 
 **The Studio says:** "The file name doesn't match its manifest".
